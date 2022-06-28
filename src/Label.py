@@ -6,8 +6,8 @@ from .Util import *
 
 class Label:
 
-    def __init__(self, image_id: int, image_name: str, pred_label: PredLabel, gt_match_label: GtLabel,
-                 gt_unmatch_label: GtLabel,
+    def __init__(self, image_id: int, image_name: str,
+                 pred_label: PredLabel, gt_match_label: GtLabel, gt_unmatch_label: GtLabel,
                  iou_threshold: float, confidence_threshold: float):
 
         self.image_id = image_id
