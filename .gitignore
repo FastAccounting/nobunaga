@@ -1,0 +1,7 @@
+.idea
+_output
+src/__pycache__
+tidecv.egg-info
+src/.DS_Store
+.DS_Store
+
