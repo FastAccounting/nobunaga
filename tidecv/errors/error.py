@@ -1,10 +1,12 @@
 from typing import Union
 
 import cv2
+
 from .. import functions as f
 
+
 class Error:
-    """ A base class for all error types. """
+    """A base class for all error types."""
 
     def fix(self) -> Union[tuple, None]:
         """
@@ -17,41 +19,64 @@ class Error:
         raise NotImplementedError
 
     def unfix(self) -> Union[tuple, None]:
-        """ Returns the original version of this data point. """
+        """Returns the original version of this data point."""
 
-        if hasattr(self, 'pred'):
+        if hasattr(self, "pred"):
             # If an ignored instance is an error, it's not in the data point list, so there's no "unfixed" entry
-            if self.pred['used'] is None: return None
-            else: return self.pred['class'], (self.pred['score'], False, self.pred['info'])
+            if self.pred["used"] is None:
+                return None
+            else:
+                return self.pred["class"], (self.pred["score"], False, self.pred["info"])
         else:
             return None
-    
+
     def get_id(self) -> int:
-        if hasattr(self, 'pred'):
-            return self.pred['_id']
-        elif hasattr(self, 'gt'):
-            return self.gt['_id']
+        if hasattr(self, "pred"):
+            return self.pred["_id"]
+        elif hasattr(self, "gt"):
+            return self.gt["_id"]
         else:
             return -1
-    
-    
-    def show(self, dataset, out_path:str=None,
-        pred_color:tuple=(43, 12, 183), gt_color:tuple=(43, 183, 12),
-        font=cv2.FONT_HERSHEY_SIMPLEX):
-        
-        pred = self.pred if hasattr(self, 'pred') else self.gt
-        img = dataset.get_img_with_anns(pred['image_id'])
 
-        
-        if hasattr(self, 'gt'):
-            img = cv2.rectangle(img, *f.points(self.gt['bbox']), gt_color, 2)
-            img = cv2.putText(img, dataset.cat_name(self.gt['category_id']),
-                (100, 200), font, 1, gt_color, 2, cv2.LINE_AA, False)
-    
-        if hasattr(self, 'pred'):
-            img = cv2.rectangle(img, *f.points(pred['bbox']), pred_color, 2)
-            img = cv2.putText(img, '%s (%.2f)' % (dataset.cat_name(pred['category_id']), pred['score']),
-                (100, 100), font, 1, pred_color, 2, cv2.LINE_AA, False)
+    def show(
+        self,
+        dataset,
+        out_path: str = None,
+        pred_color: tuple = (43, 12, 183),
+        gt_color: tuple = (43, 183, 12),
+        font=cv2.FONT_HERSHEY_SIMPLEX,
+    ):
+
+        pred = self.pred if hasattr(self, "pred") else self.gt
+        img = dataset.get_img_with_anns(pred["image_id"])
+
+        if hasattr(self, "gt"):
+            img = cv2.rectangle(img, *f.points(self.gt["bbox"]), gt_color, 2)
+            img = cv2.putText(
+                img,
+                dataset.cat_name(self.gt["category_id"]),
+                (100, 200),
+                font,
+                1,
+                gt_color,
+                2,
+                cv2.LINE_AA,
+                False,
+            )
+
+        if hasattr(self, "pred"):
+            img = cv2.rectangle(img, *f.points(pred["bbox"]), pred_color, 2)
+            img = cv2.putText(
+                img,
+                "%s (%.2f)" % (dataset.cat_name(pred["category_id"]), pred["score"]),
+                (100, 100),
+                font,
+                1,
+                pred_color,
+                2,
+                cv2.LINE_AA,
+                False,
+            )
 
         if out_path is None:
             cv2.imshow(self.short_name, img)
@@ -61,27 +86,21 @@ class Error:
             cv2.destroyAllWindows()
         else:
             cv2.imwrite(out_path, img)
-    
+
     def get_info(self, dataset):
         info = {}
-        info['type'] = self.short_name
+        info["type"] = self.short_name
 
-        if hasattr(self, 'gt'):
-            info['gt']   = self.gt
-        if hasattr(self, 'pred'):
-            info['pred'] = self.pred
-        
-        img_id = (self.pred if hasattr(self, 'pred') else self.gt)['image_id']
-        info['all_gt'] = dataset.get(img_id)
-        info['img']    = dataset.get_img(img_id)
+        if hasattr(self, "gt"):
+            info["gt"] = self.gt
+        if hasattr(self, "pred"):
+            info["pred"] = self.pred
+
+        img_id = (self.pred if hasattr(self, "pred") else self.gt)["image_id"]
+        info["all_gt"] = dataset.get(img_id)
+        info["img"] = dataset.get_img(img_id)
 
         return info
-
-
-
-
-
-
 
 
 class BestGTMatch:
@@ -101,23 +120,23 @@ class BestGTMatch:
         self.pred = pred
         self.gt = gt
 
-        if self.gt['used']:
+        if self.gt["used"]:
             self.suppress = True
         else:
             self.suppress = False
-            self.gt['usable'] = True
+            self.gt["usable"] = True
 
-            score = self.pred['score']
+            score = self.pred["score"]
 
-            if not 'best_score' in self.gt:
-                self.gt['best_score'] = -1
+            if not "best_score" in self.gt:
+                self.gt["best_score"] = -1
 
-            if self.gt['best_score'] < score:
-                self.gt['best_score'] = score
-                self.gt['best_id'] = self.pred['_id']
-        
+            if self.gt["best_score"] < score:
+                self.gt["best_score"] = score
+                self.gt["best_id"] = self.pred["_id"]
+
     def fix(self):
-        if self.suppress or self.gt['best_id'] != self.pred['_id']:
+        if self.suppress or self.gt["best_id"] != self.pred["_id"]:
             return None
         else:
-            return (self.pred['score'], True, self.pred['info'])
+            return (self.pred["score"], True, self.pred["info"])

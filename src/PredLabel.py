@@ -1,6 +1,13 @@
 class PredLabel:
-
-    def __init__(self, image_id: int, image_name: str, index: int, category_id: int, bbox: list, confidence: float):
+    def __init__(
+        self,
+        image_id: int,
+        image_name: str,
+        index: int,
+        category_id: int,
+        bbox: list,
+        confidence: float,
+    ):
 
         self.image_id = image_id
         self.image_name = image_name

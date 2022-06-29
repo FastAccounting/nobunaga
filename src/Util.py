@@ -1,10 +1,11 @@
 import os
 import platform
-from PIL import Image, ImageDraw, ImageFont
+
 import numpy as np
+from PIL import Image, ImageDraw, ImageFont
+
 
 class Util:
-
     @staticmethod
     def print_table(rows: list, title: str = None):
         print()
@@ -12,24 +13,36 @@ class Util:
         max_cols = max([len(row) for row in rows])
         for row in rows:
             while len(row) < max_cols:
-                row.append('')
+                row.append("")
 
         # Compute the text width of each column
-        col_widths = [max([len(rows[i][col_idx]) for i in range(len(rows))]) for col_idx in range(len(rows[0]))]
+        col_widths = [
+            max([len(rows[i][col_idx]) for i in range(len(rows))])
+            for col_idx in range(len(rows[0]))
+        ]
 
-        divider = '--' + ('---'.join(['-' * w for w in col_widths])) + '-'
-        thick_divider = divider.replace('-', '=')
+        divider = "--" + ("---".join(["-" * w for w in col_widths])) + "-"
+        thick_divider = divider.replace("-", "=")
 
         if title:
             left_pad = (len(divider) - len(title)) // 2
-            print(('{:>%ds}' % (left_pad + len(title))).format(title))
+            print(("{:>%ds}" % (left_pad + len(title))).format(title))
 
         print(thick_divider)
         for row in rows:
             # Print each row while padding to each column's text width
-            print('  ' + '   '.join(
-                [('{:>%ds}' % col_widths[col_idx]).format(row[col_idx]) for col_idx in range(len(row))]) + '  ')
-            if row == rows[0]: print(divider)
+            print(
+                "  "
+                + "   ".join(
+                    [
+                        ("{:>%ds}" % col_widths[col_idx]).format(row[col_idx])
+                        for col_idx in range(len(row))
+                    ]
+                )
+                + "  "
+            )
+            if row == rows[0]:
+                print(divider)
         print(thick_divider)
         print()
 
@@ -78,20 +91,27 @@ class Util:
             intersection_bottom = gt_bottom
         elif gt_top <= pred_bottom <= gt_bottom:
             intersection_bottom = pred_bottom
-        intersection = (intersection_right - intersection_left) * (intersection_bottom - intersection_top)
-        union = (pred_right - pred_left) * (pred_bottom - pred_top) + (gt_right - gt_left) * (
-                    gt_bottom - gt_top) - intersection
+        intersection = (intersection_right - intersection_left) * (
+            intersection_bottom - intersection_top
+        )
+        union = (
+            (pred_right - pred_left) * (pred_bottom - pred_top)
+            + (gt_right - gt_left) * (gt_bottom - gt_top)
+            - intersection
+        )
         iou = 0.0 if union <= 0 else float(intersection / union)
         return iou
 
     @staticmethod
     def get_file_name(file_path):
         try:
-            return os.path.splitext(os.path.basename(file_path))[0] \
-                   + os.path.splitext(os.path.basename(file_path))[1]
+            return (
+                os.path.splitext(os.path.basename(file_path))[0]
+                + os.path.splitext(os.path.basename(file_path))[1]
+            )
         except Exception as e:
             print(e)
-            return ''
+            return ""
 
     @staticmethod
     def get_file_name_only(file_path):
@@ -99,7 +119,7 @@ class Util:
             return os.path.splitext(os.path.basename(file_path))[0]
         except Exception as e:
             print(e)
-            return ''
+            return ""
 
     @staticmethod
     def get_directory(file_path):
@@ -107,10 +127,12 @@ class Util:
             return os.path.dirname(file_path)
         except Exception as e:
             print(e)
-            return ''
+            return ""
 
     @staticmethod
-    def write_label(image_path: str, new_file_path: str, pred_bboxes: list, gt_bboxes: list, is_mac: bool):
+    def write_label(
+        image_path: str, new_file_path: str, pred_bboxes: list, gt_bboxes: list, is_mac: bool
+    ):
         pred_image = Image.open(image_path)
         if pred_image.mode != "RGB":
             pred_image = pred_image.convert("RGB")
@@ -125,16 +147,27 @@ class Util:
                 pred_height = bbox[4]
                 pred_bottom = pred_top + pred_height
                 score = bbox[5]
-                pred_draw.line(((pred_left, pred_top), (pred_left, pred_bottom)), fill='red', width=1)
-                pred_draw.line(((pred_right, pred_top), (pred_right, pred_bottom)), fill='red', width=1)
-                pred_draw.line(((pred_left, pred_top), (pred_right, pred_top)), fill='red', width=1)
-                pred_draw.line(((pred_left, pred_bottom), (pred_right, pred_bottom)), fill='red', width=1)
+                pred_draw.line(
+                    ((pred_left, pred_top), (pred_left, pred_bottom)), fill="red", width=1
+                )
+                pred_draw.line(
+                    ((pred_right, pred_top), (pred_right, pred_bottom)), fill="red", width=1
+                )
+                pred_draw.line(((pred_left, pred_top), (pred_right, pred_top)), fill="red", width=1)
+                pred_draw.line(
+                    ((pred_left, pred_bottom), (pred_right, pred_bottom)), fill="red", width=1
+                )
 
                 # write label name
                 text_size = 16
                 font = Util.get_font(text_size)
-                pred_draw.text((pred_left, pred_top - text_size - 5), name + ':' + str(score), font=font, fill='#000000')
-                pred_draw.text((pred_image.width / 2, 10), 'Pred', font=font, fill='#000000')
+                pred_draw.text(
+                    (pred_left, pred_top - text_size - 5),
+                    name + ":" + str(score),
+                    font=font,
+                    fill="#000000",
+                )
+                pred_draw.text((pred_image.width / 2, 10), "Pred", font=font, fill="#000000")
 
         gt_image = Image.open(image_path)
         if gt_image.mode != "RGB":
@@ -150,18 +183,18 @@ class Util:
                 gt_height = bbox[4]
                 gt_bottom = gt_top + gt_height
                 score = bbox[5]
-                gt_draw.line(((gt_left, gt_top), (gt_left, gt_bottom)), fill='red', width=1)
-                gt_draw.line(((gt_right, gt_top), (gt_right, gt_bottom)), fill='red', width=1)
-                gt_draw.line(((gt_left, gt_top), (gt_right, gt_top)), fill='red', width=1)
-                gt_draw.line(((gt_left, gt_bottom), (gt_right, gt_bottom)), fill='red', width=1)
+                gt_draw.line(((gt_left, gt_top), (gt_left, gt_bottom)), fill="red", width=1)
+                gt_draw.line(((gt_right, gt_top), (gt_right, gt_bottom)), fill="red", width=1)
+                gt_draw.line(((gt_left, gt_top), (gt_right, gt_top)), fill="red", width=1)
+                gt_draw.line(((gt_left, gt_bottom), (gt_right, gt_bottom)), fill="red", width=1)
 
                 # write label name
                 text_size = 16
                 font = Util.get_font(text_size)
-                gt_draw.text((gt_left, gt_top - text_size - 5), name, font=font, fill='#000000')
-                gt_draw.text((gt_image.width / 2, 10), 'GT', font=font, fill='#000000')
+                gt_draw.text((gt_left, gt_top - text_size - 5), name, font=font, fill="#000000")
+                gt_draw.text((gt_image.width / 2, 10), "GT", font=font, fill="#000000")
 
-        dst = Image.new('RGB', (pred_image.width + gt_image.width, pred_image.height))
+        dst = Image.new("RGB", (pred_image.width + gt_image.width, pred_image.height))
         dst.paste(pred_image, (0, 0))
         dst.paste(gt_image, (pred_image.width, 0))
         dst.save(new_file_path)
@@ -169,7 +202,9 @@ class Util:
 
     @staticmethod
     def get_font(text_size: int):
-        font = ImageFont.truetype('/Library/Fonts/Arial Unicode.ttf', text_size)
-        if platform.system() == 'Linux':
-            font = ImageFont.truetype('/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf', text_size)
+        font = ImageFont.truetype("/Library/Fonts/Arial Unicode.ttf", text_size)
+        if platform.system() == "Linux":
+            font = ImageFont.truetype(
+                "/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf", text_size
+            )
         return font

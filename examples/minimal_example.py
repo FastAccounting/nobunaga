@@ -3,6 +3,6 @@
 from tidecv import TIDE, datasets
 
 tide = TIDE()
-tide.evaluate(datasets.COCO(), datasets.COCOResult('mask_rcnn_bbox.json'), mode=TIDE.BOX)
+tide.evaluate(datasets.COCO(), datasets.COCOResult("mask_rcnn_bbox.json"), mode=TIDE.BOX)
 tide.summarize()
 tide.plot()

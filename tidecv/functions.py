@@ -1,15 +1,18 @@
+import os
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-import os, sys
 
-def mean(arr:list):
+def mean(arr: list):
     if len(arr) == 0:
         return 0
     return sum(arr) / len(arr)
 
-def find_first(arr:np.array) -> int:
-    """ Finds the index of the first instance of true in a vector or None if not found. """
+
+def find_first(arr: np.array) -> int:
+    """Finds the index of the first instance of true in a vector or None if not found."""
     if len(arr) == 0:
         return None
     idx = arr.argmax()
@@ -17,8 +20,9 @@ def find_first(arr:np.array) -> int:
     # Numpy argmax will return 0 if no True is found
     if idx == 0 and not arr[0]:
         return None
-    
+
     return idx
+
 
 def isiterable(x):
     try:
@@ -26,6 +30,7 @@ def isiterable(x):
         return True
     except:
         return False
+
 
 def recursive_sum(x):
     if isinstance(x, dict):
@@ -35,11 +40,16 @@ def recursive_sum(x):
     else:
         return x
 
-def apply_messy(x:list, func):
+
+def apply_messy(x: list, func):
     return [([func(y) for y in e] if isiterable(e) else func(e)) for e in x]
 
-def apply_messy2(x:list, y:list, func):
-    return [[func(i, j) for i, j in zip(a, b)] if isiterable(a) else func(a, b) for a, b in zip(x, y)]
+
+def apply_messy2(x: list, y: list, func):
+    return [
+        [func(i, j) for i, j in zip(a, b)] if isiterable(a) else func(a, b) for a, b in zip(x, y)
+    ]
+
 
 def multi_len(x):
     try:
@@ -47,13 +57,15 @@ def multi_len(x):
     except TypeError:
         return 1
 
+
 def unzip(l):
     return map(list, zip(*l))
 
 
 def points(bbox):
     bbox = [int(x) for x in bbox]
-    return (bbox[0], bbox[1]), (bbox[0]+bbox[2], bbox[1]+bbox[3])
+    return (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])
+
 
 def nonepack(t):
     if t is None:
@@ -63,20 +75,18 @@ def nonepack(t):
 
 
 class HiddenPrints:
-    """ From https://stackoverflow.com/questions/8391411/suppress-calls-to-print-python """
+    """From https://stackoverflow.com/questions/8391411/suppress-calls-to-print-python"""
 
     def __enter__(self):
         self._original_stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
+        sys.stdout = open(os.devnull, "w")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout.close()
         sys.stdout = self._original_stdout
 
 
-
-
-def toRLE(mask:object, w:int, h:int):
+def toRLE(mask: object, w: int, h: int):
     """
     Borrowed from Pycocotools:
     Convert annotation which can be polygons, uncompressed RLE to RLE.
@@ -92,15 +102,15 @@ def toRLE(mask:object, w:int, h:int):
             return maskUtils.merge(rles)
         else:
             return mask
-    elif type(mask['counts']) == list:
+    elif type(mask["counts"]) == list:
         # uncompressed RLE
         return maskUtils.frPyObjects(mask, h, w)
     else:
         return mask
 
 
-def polyToBox(poly:list):
-    """ Converts a polygon in COCO lists of lists format to a bounding box in [x, y, w, h]. """
+def polyToBox(poly: list):
+    """Converts a polygon in COCO lists of lists format to a bounding box in [x, y, w, h]."""
 
     xmin = 1e10
     xmax = -1e10
@@ -109,12 +119,12 @@ def polyToBox(poly:list):
 
     for poly_comp in poly:
         for i in range(len(poly_comp) // 2):
-            x = poly_comp[2*i + 0]
-            y = poly_comp[2*i + 1]
+            x = poly_comp[2 * i + 0]
+            y = poly_comp[2 * i + 1]
 
             xmin = min(x, xmin)
             xmax = max(x, xmax)
             ymin = min(y, ymin)
             ymax = max(y, ymax)
-    
+
     return [xmin, ymin, (xmax - xmin), (ymax - ymin)]
