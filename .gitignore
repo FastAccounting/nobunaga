@@ -4,4 +4,8 @@ src/__pycache__
 tidecv.egg-info
 src/.DS_Store
 .DS_Store
+_normal/
+_error/
+*.png
+*.csv
 

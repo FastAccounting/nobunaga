@@ -1,23 +1,26 @@
-from .PredJson import *
 from .GtJson import *
 from .Image import *
+from .PredJson import *
 
 
 class Evaluator:
-    def __init__(self, gt: GtJson, pred: PredJson, iou_threshold: float, confidence_threshold: float):
+    def __init__(
+        self, gt: GtJson, pred: PredJson, iou_threshold: float, confidence_threshold: float
+    ):
         self.gt = gt
         self.pred = pred
         self.images = []
         for image_id, gt_annotation in self.gt.get_annotations().items():
             image = self.gt.get_image_by_image_id(image_id)
             pred_annotation = self.pred.get_annotation_by_image_id(image_id)
-            image = Image(image,
-                          self.gt.get_categories(),
-                          gt_annotation,
-                          pred_annotation,
-                          iou_threshold,
-                          confidence_threshold
-                          )
+            image = Image(
+                image,
+                self.gt.get_categories(),
+                gt_annotation,
+                pred_annotation,
+                iou_threshold,
+                confidence_threshold,
+            )
             self.images.append(image)
 
     def get_images(self):

@@ -1,9 +1,9 @@
+from .Constants import *
 from .Evaluator import *
-from .PredJson import *
 from .GtJson import *
 from .Image import *
-from .Label import *
 from .ImagePrinter import *
-from .Constants import *
+from .Label import *
+from .PredJson import *
 
 __all__ = list(globals().keys())
