@@ -70,7 +70,7 @@ class ImagePrinter:
         plt.xlabel("Predict", fontsize=13)
         plt.ylabel("GT", fontsize=13)
         fig.subplots_adjust(bottom=0.15)
-        plt.savefig("class_error_confusion_matrix.png")
+        plt.savefig("_class_error_confusion_matrix.png")
 
     def output_error_type_matrix(self, normalize: bool, model_name: str):
         confusion_matrix = {}
