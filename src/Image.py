@@ -133,29 +133,29 @@ class Image:
         for transpose_gt_index, class_match_row in enumerate(transpose_class_match_matrix):
             duplicates = []
             for transpose_pred_index, class_match_iou in enumerate(class_match_row):
-                if class_match_iou >= self.iou_threshold:
+                if class_match_iou > Const.THRESHOLD_MIN_DETECTED:
                     duplicates.append(transpose_pred_index)
             if len(duplicates) > 1:
                 for transpose_pred_index in duplicates:
                     # prediction
-                    pred_category_id = self.pred_category_row_relations.get(transpose_gt_index, -1)
-                    pred_confidence = self.preds[transpose_gt_index].get("score", -1)
+                    pred_category_id = self.pred_category_row_relations.get(transpose_pred_index, -1)
+                    pred_confidence = self.preds[transpose_pred_index].get("score", -1)
                     pred_label = PredLabel(
                         self.get_image_id(),
                         self.get_image_name(),
-                        transpose_gt_index,
+                        transpose_pred_index,
                         pred_category_id,
-                        pred_bbox[transpose_gt_index],
+                        pred_bboxes[transpose_pred_index],
                         pred_confidence,
                     )
                     # ground truth
                     match_category_id = self.gt_category_column_relations.get(
-                        transpose_pred_index, -1
+                        transpose_gt_index, -1
                     )
                     gt_label = GtLabel(
                         self.get_image_id(),
                         self.get_image_name(),
-                        transpose_pred_index,
+                        transpose_gt_index,
                         match_category_id,
                         gt_bboxes[transpose_gt_index],
                     )

@@ -46,7 +46,12 @@ def main():
     # printer.output_per_accuracy_and_errors()
     printer.output_confusion_matrix(args.normalize, args.model_name)
     printer.output_error_file_names()
-    printer.output_error_files(args.image_dir)
+    printer.output_class_error_files(args.image_dir)
+    printer.output_location_error_files(args.image_dir)
+    printer.output_duplicate_error_files(args.image_dir)
+    printer.output_background_error_files(args.image_dir)
+    printer.output_miss_error_files(args.image_dir)
+    printer.output_both_error_files(args.image_dir)
 
 
 if __name__ == "__main__":

@@ -71,20 +71,25 @@ class Label:
             <= self.get_max_unmatch_iou()
             < self.get_max_match_iou()
             < Const.THRESHOLD_MIN_DETECTED
+            and not self.is_duplicate_error()
+            and not self.is_miss_error()
         )
 
     def is_class_error(self):
-        is_class_error = (
+        return (
             self.get_pred_category_id() != self.get_max_unmatch_category_id()
             and self.get_max_unmatch_iou() > self.get_max_match_iou()
             and self.get_max_unmatch_iou() > self.iou_threshold
+            and not self.is_duplicate_error()
+            and not self.is_miss_error()
         )
-        return is_class_error
 
     def is_location_error(self):
         return (
             self.iou_threshold > self.get_max_match_iou() > Const.THRESHOLD_MIN_DETECTED
             and self.get_max_match_iou() > self.get_max_unmatch_iou()
+            and not self.is_duplicate_error()
+            and not self.is_miss_error()
         )
 
     def is_both_error(self):
@@ -92,6 +97,8 @@ class Label:
             self.get_pred_category_id() != self.get_max_unmatch_category_id()
             and self.get_max_unmatch_iou() > self.get_max_match_iou()
             and self.iou_threshold > self.get_max_unmatch_iou() > Const.THRESHOLD_MIN_DETECTED
+            and not self.is_duplicate_error()
+            and not self.is_miss_error()
         )
 
     def is_miss_error(self):
