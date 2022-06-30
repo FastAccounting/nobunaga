@@ -97,7 +97,7 @@ class Label:
     def is_miss_error(self):
         return (
             self.pred_label is None
-            and self.gt_match_label is None
+            and self.gt_match_label is not None
             and self.gt_unmatch_label is None
         )
 
