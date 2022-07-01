@@ -248,19 +248,25 @@ def _draw_single_box(
     )
 
     if display_str:
-        text_bottom = bottom
         # Reverse list and print from bottom to top.
         text_width, text_height = font.getsize(display_str)
         margin = np.ceil(0.05 * text_height)
+
+        box_height = ymax - ymin
+        if text_height < box_height/3:
+            text_position = bottom
+        else:
+            text_position = top
+
         draw.rectangle(
             xy=[
-                (left + width, text_bottom - text_height - 2 * margin - width),
-                (left + text_width + width, text_bottom - width),
+                (left + width, text_position - text_height - 2 * margin - width),
+                (left + text_width + width, text_position - width),
             ],
             fill=alpha_color,
         )
         draw.text(
-            (left + margin + width, text_bottom - text_height - margin - width),
+            (left + margin + width, text_position - text_height - margin - width),
             display_str,
             fill="black",
             font=font,
