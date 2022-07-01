@@ -22,6 +22,9 @@ class ImagePrinter:
         self.duplicate_error_labels = evaluation.get_duplicate_errors()
         self.miss_error_labels = evaluation.get_miss_errors()
         self.both_error_labels = evaluation.get_both_errors()
+        self.index_category_id_relations = {}
+        for index, category_id in enumerate(self.categories.keys()):
+            self.index_category_id_relations[category_id] = index
 
     def output_confusion_matrix(self, normalize: bool, model_name: str):
         confusion_matrix = {}
@@ -44,7 +47,7 @@ class ImagePrinter:
                 + [category_name for category_id, category_name in self.categories.items()],
             ]
             + [
-                [category_name] + [str(cnt) for cnt in cm[category_id]]
+                [category_name] + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id, -1)]]
                 for category_id, category_name in self.categories.items()
             ],
             title=f"{model_name} confusion matrix",
@@ -70,7 +73,7 @@ class ImagePrinter:
         plt.xlabel("Predict", fontsize=13)
         plt.ylabel("GT", fontsize=13)
         fig.subplots_adjust(bottom=0.15)
-        plt.savefig("class_error_confusion_matrix.png")
+        plt.savefig("_class_error_confusion_matrix.png")
 
     def output_error_type_matrix(self, normalize: bool, model_name: str):
         confusion_matrix = {}
@@ -79,27 +82,27 @@ class ImagePrinter:
         # row: ground truth classes, col: error_type
         cm = np.zeros((class_count, error_type_count), dtype=np.int32)
         for error_label in self.class_error_labels:
-            category_id = error_label.get_max_match_category_id()
+            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.location_error_labels:
-            category_id = error_label.get_max_match_category_id()
+            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.duplicate_error_labels:
-            category_id = error_label.get_max_match_category_id()
+            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.background_error_labels:
-            category_id = error_label.get_max_match_category_id()
+            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.miss_error_labels:
-            category_id = error_label.get_max_match_category_id()
+            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.both_error_labels:
-            category_id = error_label.get_max_match_category_id()
+            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
 
@@ -110,7 +113,7 @@ class ImagePrinter:
                 ["label/error"] + [error_type for error_type in Const.ERROR_TYPES],
             ]
             + [
-                [category_name] + [str(cnt) for cnt in cm[category_id]]
+                [category_name] + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
                 for category_id, category_name in self.categories.items()
             ],
             title=f"{model_name} error type matrix",
@@ -323,12 +326,12 @@ class ImagePrinter:
         with open("_error_file_names.csv", mode="w") as f:
             f.writelines(row_items)
 
-    def output_error_files(self, image_dir: str):
+    def output_class_error_files(self, image_dir: str):
         output_dir = "./_error"
         os.makedirs(output_dir, exist_ok=True)
 
-        index = 0
         # class error
+        index_dict = {}
         for error_label in self.class_error_labels:
             pred_label = error_label.get_pred_label()
             gt_label = error_label.get_gt_unmatch_label()
@@ -348,16 +351,22 @@ class ImagePrinter:
             new_file_path = (
                 output_dir
                 + "/"
+                + image_name.split(".")[0]
+                + "_"
                 + error_label.get_error_type()
-                + "_"
-                + str(index)
-                + "_"
-                + image_name
+                + str(index_dict.get(image_name, 1))
+                + "."
+                + image_name.split(".")[1]
             )
             Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index += 1
+            index_dict[image_name] = index_dict.get(image_name, 1) + 1
+
+    def output_location_error_files(self, image_dir: str):
+        output_dir = "./_error"
+        os.makedirs(output_dir, exist_ok=True)
 
         # location error
+        index_dict = {}
         for error_label in self.location_error_labels:
             pred_label = error_label.get_pred_label()
             gt_label = error_label.get_gt_match_label()
@@ -377,16 +386,22 @@ class ImagePrinter:
             new_file_path = (
                 output_dir
                 + "/"
+                + image_name.split(".")[0]
+                + "_"
                 + error_label.get_error_type()
-                + "_"
-                + str(index)
-                + "_"
-                + image_name
+                + str(index_dict.get(image_name, 1))
+                + "."
+                + image_name.split(".")[1]
             )
             Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index += 1
+            index_dict[image_name] = index_dict.get(image_name, 1) + 1
+
+    def output_duplicate_error_files(self, image_dir: str):
+        output_dir = "./_error"
+        os.makedirs(output_dir, exist_ok=True)
 
         # duplicate error
+        index_dict = {}
         for error_label in self.duplicate_error_labels:
             pred_label = error_label.get_pred_label()
             gt_label = error_label.get_gt_match_label()
@@ -406,16 +421,22 @@ class ImagePrinter:
             new_file_path = (
                 output_dir
                 + "/"
+                + image_name.split(".")[0]
+                + "_"
                 + error_label.get_error_type()
-                + "_"
-                + str(index)
-                + "_"
-                + image_name
+                + str(index_dict.get(image_name, 1))
+                + "."
+                + image_name.split(".")[1]
             )
             Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index += 1
+            index_dict[image_name] = index_dict.get(image_name, 1) + 1
+
+    def output_background_error_files(self, image_dir: str):
+        output_dir = "./_error"
+        os.makedirs(output_dir, exist_ok=True)
 
         # background error
+        index_dict = {}
         for error_label in self.background_error_labels:
             pred_label = error_label.get_pred_label()
             gt_label = None
@@ -435,16 +456,22 @@ class ImagePrinter:
             new_file_path = (
                 output_dir
                 + "/"
+                + image_name.split(".")[0]
+                + "_"
                 + error_label.get_error_type()
-                + "_"
-                + str(index)
-                + "_"
-                + image_name
+                + str(index_dict.get(image_name, 1))
+                + "."
+                + image_name.split(".")[1]
             )
             Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index += 1
+            index_dict[image_name] = index_dict.get(image_name, 1) + 1
+
+    def output_miss_error_files(self, image_dir: str):
+        output_dir = "./_error"
+        os.makedirs(output_dir, exist_ok=True)
 
         # miss error
+        index_dict = {}
         for error_label in self.miss_error_labels:
             pred_label = None
             gt_label = error_label.get_gt_match_label()
@@ -464,16 +491,22 @@ class ImagePrinter:
             new_file_path = (
                 output_dir
                 + "/"
+                + image_name.split(".")[0]
+                + "_"
                 + error_label.get_error_type()
-                + "_"
-                + str(index)
-                + "_"
-                + image_name
+                + str(index_dict.get(image_name, 1))
+                + "."
+                + image_name.split(".")[1]
             )
             Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index += 1
+            index_dict[image_name] = index_dict.get(image_name, 1) + 1
+
+    def output_both_error_files(self, image_dir: str):
+        output_dir = "./_error"
+        os.makedirs(output_dir, exist_ok=True)
 
         # both error
+        index_dict = {}
         for error_label in self.both_error_labels:
             pred_label = error_label.get_pred_label()
             gt_label = error_label.get_gt_unmatch_label()
@@ -491,10 +524,17 @@ class ImagePrinter:
             gt_confidence = ""
             gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
             new_file_path = (
-                output_dir + "/" + error_label.get_error_type() + str(index) + "_" + image_name
+                output_dir
+                + "/"
+                + image_name.split(".")[0]
+                + "_"
+                + error_label.get_error_type()
+                + str(index_dict.get(image_name, 1))
+                + "."
+                + image_name.split(".")[1]
             )
             Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index += 1
+            index_dict[image_name] = index_dict.get(image_name, 1) + 1
 
     def output_labeled_images(self, image_dir: str):
         output_dir = "./_normal"
