@@ -236,8 +236,6 @@ def _draw_single_box(
     alpha=0.5,
     fill=False,
 ):
-    if font is None:
-        font = FONT
 
     draw = ImageDraw.Draw(image, mode="RGBA")
     left, right, top, bottom = xmin, xmax, ymin, ymax
