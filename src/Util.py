@@ -136,7 +136,13 @@ class Util:
         pred_image = Image.open(image_path)
         if pred_image.mode != "RGB":
             pred_image = pred_image.convert("RGB")
-        pred_draw = ImageDraw.Draw(pred_image)
+        score_format = ": {:.1f}"
+        width = 2
+        alpha = 0.5
+        text_size = 16
+        fill = False
+        font = Util.get_font(text_size)
+
         if len(pred_bboxes) > 0:
             for bbox in pred_bboxes:
                 name = bbox[0]
@@ -147,32 +153,30 @@ class Util:
                 pred_height = bbox[4]
                 pred_bottom = pred_top + pred_height
                 score = bbox[5]
-                pred_draw.line(
-                    ((pred_left, pred_top), (pred_left, pred_bottom)), fill="red", width=1
-                )
-                pred_draw.line(
-                    ((pred_right, pred_top), (pred_right, pred_bottom)), fill="red", width=1
-                )
-                pred_draw.line(((pred_left, pred_top), (pred_right, pred_top)), fill="red", width=1)
-                pred_draw.line(
-                    ((pred_left, pred_bottom), (pred_right, pred_bottom)), fill="red", width=1
+                color = (0, 255, 0)
+                display_str = name + score_format.format(score)
+
+                pred_image = _draw_single_box(
+                    image=pred_image,
+                    xmin=pred_left,
+                    ymin=pred_top,
+                    xmax=pred_right,
+                    ymax=pred_bottom,
+                    color=color,
+                    display_str=display_str,
+                    font=font,
+                    width=width,
+                    alpha=alpha,
+                    fill=fill,
                 )
 
-                # write label name
-                text_size = 16
-                font = Util.get_font(text_size)
-                pred_draw.text(
-                    (pred_left, pred_top - text_size - 5),
-                    name + ":" + str(score),
-                    font=font,
-                    fill="#000000",
-                )
-                pred_draw.text((pred_image.width / 2, 10), "Pred", font=font, fill="#000000")
+        pred_draw = ImageDraw.Draw(pred_image)
+        pred_draw.text((pred_image.width / 2, 10), "Pred", font=font, fill="#000000")
 
         gt_image = Image.open(image_path)
         if gt_image.mode != "RGB":
             gt_image = gt_image.convert("RGB")
-        gt_draw = ImageDraw.Draw(gt_image)
+
         if len(gt_bboxes) > 0:
             for bbox in gt_bboxes:
                 name = bbox[0]
@@ -183,16 +187,25 @@ class Util:
                 gt_height = bbox[4]
                 gt_bottom = gt_top + gt_height
                 score = bbox[5]
-                gt_draw.line(((gt_left, gt_top), (gt_left, gt_bottom)), fill="red", width=1)
-                gt_draw.line(((gt_right, gt_top), (gt_right, gt_bottom)), fill="red", width=1)
-                gt_draw.line(((gt_left, gt_top), (gt_right, gt_top)), fill="red", width=1)
-                gt_draw.line(((gt_left, gt_bottom), (gt_right, gt_bottom)), fill="red", width=1)
+                color = (0, 255, 0)
+                display_str = name
 
-                # write label name
-                text_size = 16
-                font = Util.get_font(text_size)
-                gt_draw.text((gt_left, gt_top - text_size - 5), name, font=font, fill="#000000")
-                gt_draw.text((gt_image.width / 2, 10), "GT", font=font, fill="#000000")
+                gt_image = _draw_single_box(
+                    image=gt_image,
+                    xmin=gt_left,
+                    ymin=gt_top,
+                    xmax=gt_right,
+                    ymax=gt_bottom,
+                    color=color,
+                    display_str=display_str,
+                    font=font,
+                    width=width,
+                    alpha=alpha,
+                    fill=fill,
+                )
+
+        gt_draw = ImageDraw.Draw(gt_image)
+        gt_draw.text((gt_image.width / 2, 10), "GT", font=font, fill="#000000")
 
         dst = Image.new("RGB", (pred_image.width + gt_image.width, pred_image.height))
         dst.paste(pred_image, (0, 0))
@@ -208,3 +221,51 @@ class Util:
                 "/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf", text_size
             )
         return font
+
+
+def _draw_single_box(
+    image,
+    xmin,
+    ymin,
+    xmax,
+    ymax,
+    color=(0, 255, 0),
+    display_str=None,
+    font=None,
+    width=2,
+    alpha=0.5,
+    fill=False,
+):
+    if font is None:
+        font = FONT
+
+    draw = ImageDraw.Draw(image, mode="RGBA")
+    left, right, top, bottom = xmin, xmax, ymin, ymax
+    alpha_color = color + (int(255 * alpha),)
+    draw.rectangle(
+        [(left, top), (right, bottom)],
+        outline=color,
+        fill=alpha_color if fill else None,
+        width=width,
+    )
+
+    if display_str:
+        text_bottom = bottom
+        # Reverse list and print from bottom to top.
+        text_width, text_height = font.getsize(display_str)
+        margin = np.ceil(0.05 * text_height)
+        draw.rectangle(
+            xy=[
+                (left + width, text_bottom - text_height - 2 * margin - width),
+                (left + text_width + width, text_bottom - width),
+            ],
+            fill=alpha_color,
+        )
+        draw.text(
+            (left + margin + width, text_bottom - text_height - margin - width),
+            display_str,
+            fill="black",
+            font=font,
+        )
+
+    return image
