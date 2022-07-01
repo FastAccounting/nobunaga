@@ -1,3 +1,4 @@
 pandas
 isort==4.3.21
 seaborn
+tqdm
