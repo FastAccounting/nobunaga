@@ -138,7 +138,9 @@ class Image:
             if len(duplicates) > 1:
                 for transpose_pred_index in duplicates:
                     # prediction
-                    pred_category_id = self.pred_category_row_relations.get(transpose_pred_index, -1)
+                    pred_category_id = self.pred_category_row_relations.get(
+                        transpose_pred_index, -1
+                    )
                     pred_confidence = self.preds[transpose_pred_index].get("score", -1)
                     pred_label = PredLabel(
                         self.get_image_id(),

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import MultipleLocator
+from tqdm import tqdm
 
 import src.Constants as Const
 from src import Evaluator, Util
@@ -47,7 +48,8 @@ class ImagePrinter:
                 + [category_name for category_id, category_name in self.categories.items()],
             ]
             + [
-                [category_name] + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id, -1)]]
+                [category_name]
+                + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id, -1)]]
                 for category_id, category_name in self.categories.items()
             ],
             title=f"{model_name} confusion matrix",
@@ -82,38 +84,49 @@ class ImagePrinter:
         # row: ground truth classes, col: error_type
         cm = np.zeros((class_count, error_type_count), dtype=np.int32)
         for error_label in self.class_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
+            category_id = self.index_category_id_relations.get(
+                error_label.get_max_match_category_id(), -1
+            )
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.location_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
+            category_id = self.index_category_id_relations.get(
+                error_label.get_max_match_category_id(), -1
+            )
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.duplicate_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
+            category_id = self.index_category_id_relations.get(
+                error_label.get_max_match_category_id(), -1
+            )
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.background_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
+            category_id = self.index_category_id_relations.get(
+                error_label.get_max_match_category_id(), -1
+            )
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.miss_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
+            category_id = self.index_category_id_relations.get(
+                error_label.get_max_match_category_id(), -1
+            )
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.both_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id(), -1)
+            category_id = self.index_category_id_relations.get(
+                error_label.get_max_match_category_id(), -1
+            )
             error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
 
         # output to terminal
         confusion_matrix[model_name] = cm
         Util.print_table(
-            [
-                ["label/error"] + [error_type for error_type in Const.ERROR_TYPES],
-            ]
+            [["label/error"] + [error_type for error_type in Const.ERROR_TYPES],]
             + [
-                [category_name] + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
+                [category_name]
+                + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
                 for category_id, category_name in self.categories.items()
             ],
             title=f"{model_name} error type matrix",
@@ -332,7 +345,7 @@ class ImagePrinter:
 
         # class error
         index_dict = {}
-        for error_label in self.class_error_labels:
+        for error_label in tqdm(self.class_error_labels, "Cls error"):
             pred_label = error_label.get_pred_label()
             gt_label = error_label.get_gt_unmatch_label()
             image_name = error_label.get_image_name()
@@ -367,7 +380,7 @@ class ImagePrinter:
 
         # location error
         index_dict = {}
-        for error_label in self.location_error_labels:
+        for error_label in tqdm(self.location_error_labels, "Loc error"):
             pred_label = error_label.get_pred_label()
             gt_label = error_label.get_gt_match_label()
             image_name = error_label.get_image_name()
@@ -402,7 +415,7 @@ class ImagePrinter:
 
         # duplicate error
         index_dict = {}
-        for error_label in self.duplicate_error_labels:
+        for error_label in tqdm(self.duplicate_error_labels, "Dupe error"):
             pred_label = error_label.get_pred_label()
             gt_label = error_label.get_gt_match_label()
             image_name = error_label.get_image_name()
@@ -437,7 +450,7 @@ class ImagePrinter:
 
         # background error
         index_dict = {}
-        for error_label in self.background_error_labels:
+        for error_label in tqdm(self.background_error_labels, desc="Bkg error"):
             pred_label = error_label.get_pred_label()
             gt_label = None
             image_name = error_label.get_image_name()
@@ -472,7 +485,7 @@ class ImagePrinter:
 
         # miss error
         index_dict = {}
-        for error_label in self.miss_error_labels:
+        for error_label in tqdm(self.miss_error_labels, desc="Miss error"):
             pred_label = None
             gt_label = error_label.get_gt_match_label()
             image_name = error_label.get_image_name()
@@ -507,7 +520,7 @@ class ImagePrinter:
 
         # both error
         index_dict = {}
-        for error_label in self.both_error_labels:
+        for error_label in tqdm(self.both_error_labels, desc="Both error"):
             pred_label = error_label.get_pred_label()
             gt_label = error_label.get_gt_unmatch_label()
             image_name = error_label.get_image_name()
