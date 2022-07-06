@@ -133,7 +133,7 @@ class Image:
         for transpose_gt_index, class_match_row in enumerate(transpose_class_match_matrix):
             duplicates = []
             for transpose_pred_index, class_match_iou in enumerate(class_match_row):
-                if class_match_iou > Const.THRESHOLD_MIN_DETECTED:
+                if class_match_iou > self.iou_threshold:
                     duplicates.append(transpose_pred_index)
             if len(duplicates) > 1:
                 for transpose_pred_index in duplicates:
