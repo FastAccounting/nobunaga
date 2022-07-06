@@ -215,11 +215,10 @@ class Util:
 
     @staticmethod
     def get_font(text_size: int):
-        font = ImageFont.truetype("/Library/Fonts/Arial Unicode.ttf", text_size)
+        font_path = "/Library/Fonts/Arial Unicode.ttf"
         if platform.system() == "Linux":
-            font = ImageFont.truetype(
-                "/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf", text_size
-            )
+            font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+        font = ImageFont.truetype(font_path, text_size)
         return font
 
 
