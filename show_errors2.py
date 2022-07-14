@@ -1,5 +1,5 @@
 import argparse
-
+import src.Constants as Const
 from src import Evaluator, GtJson, ImagePrinter, PredJson
 
 
@@ -45,13 +45,12 @@ def main():
     printer.output_error_type_matrix(args.normalize, args.model_name)
     # printer.output_per_accuracy_and_errors()
     printer.output_confusion_matrix(args.normalize, args.model_name)
-    printer.output_error_file_names()
-    printer.output_class_error_files(args.image_dir)
-    printer.output_location_error_files(args.image_dir)
-    printer.output_duplicate_error_files(args.image_dir)
-    printer.output_background_error_files(args.image_dir)
-    printer.output_miss_error_files(args.image_dir)
-    printer.output_both_error_files(args.image_dir)
+    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_CLASS)
+    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_LOCATION)
+    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_DUPLICATE)
+    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_BACKGROUND)
+    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_MISS)
+    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_BOTH)
 
 
 if __name__ == "__main__":
