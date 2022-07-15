@@ -258,144 +258,59 @@ class ImagePrinter:
         plt.subplots_adjust(left=0.05, top=0.98)
         plt.savefig("_per_accuracy_and_errors.png")
 
-    def output_error_file_names(self):
-        row_items = ['"error type","file name","ground truth","prediction"\n']
-        for error_label in self.class_error_labels:
-            match_category_name = self.categories.get(error_label.get_max_match_category_id(), "")
-            unmatch_category_name = self.categories.get(
-                error_label.get_max_unmatch_category_id(), ""
-            )
-            row_items.append(
-                '"'
-                + error_label.get_error_type()
-                + '","'
-                + error_label.get_image_name()
-                + '","'
-                + match_category_name
-                + '","'
-                + unmatch_category_name
-                + '"\n'
-            )
-        for error_label in self.location_error_labels:
-            match_category_name = self.categories.get(error_label.get_max_match_category_id(), "")
-            row_items.append(
-                '"'
-                + error_label.get_error_type()
-                + '","'
-                + error_label.get_image_name()
-                + '","'
-                + match_category_name
-                + '",""\n'
-            )
-        for error_label in self.duplicate_error_labels:
-            match_category_name = self.categories.get(error_label.get_max_match_category_id(), "")
-            row_items.append(
-                '"'
-                + error_label.get_error_type()
-                + '","'
-                + error_label.get_image_name()
-                + '","'
-                + match_category_name
-                + '",""\n'
-            )
-        for error_label in self.background_error_labels:
-            match_category_name = self.categories.get(error_label.get_max_match_category_id(), "")
-            row_items.append(
-                '"'
-                + error_label.get_error_type()
-                + '","'
-                + error_label.get_image_name()
-                + '","'
-                + match_category_name
-                + '",""\n'
-            )
-        for error_label in self.miss_error_labels:
-            match_category_name = self.categories.get(error_label.get_max_match_category_id(), "")
-            row_items.append(
-                '"'
-                + error_label.get_error_type()
-                + '","'
-                + error_label.get_image_name()
-                + '","'
-                + match_category_name
-                + '",""\n'
-            )
-        for error_label in self.both_error_labels:
-            match_category_name = self.categories.get(error_label.get_max_match_category_id(), "")
-            unmatch_category_name = self.categories.get(
-                error_label.get_max_unmatch_category_id(), ""
-            )
-            row_items.append(
-                '"'
-                + error_label.get_error_type()
-                + '","'
-                + error_label.get_image_name()
-                + '","'
-                + match_category_name
-                + '","'
-                + unmatch_category_name
-                + '"\n'
-            )
-        with open("_error_file_names.csv", mode="w") as f:
-            f.writelines(row_items)
-
-    def output_class_error_files(self, image_dir: str):
+    def output_error_files(self, image_dir: str, error_type: str):
         output_dir = "./_error"
         os.makedirs(output_dir, exist_ok=True)
+
+        error_labels = []
+        if error_type == Const.ERROR_TYPE_CLASS:
+            error_labels = self.class_error_labels
+        elif error_type == Const.ERROR_TYPE_LOCATION:
+            error_labels = self.location_error_labels
+        elif error_type == Const.ERROR_TYPE_BACKGROUND:
+            error_labels = self.background_error_labels
+        elif error_type == Const.ERROR_TYPE_MISS:
+            error_labels = self.miss_error_labels
+        elif error_type == Const.ERROR_TYPE_DUPLICATE:
+            error_labels = self.duplicate_error_labels
+        elif error_type == Const.ERROR_TYPE_BOTH:
+            error_labels = self.both_error_labels
 
         # class error
         index_dict = {}
-        for error_label in tqdm(self.class_error_labels, "Cls error"):
+        for error_label in tqdm(error_labels, error_type + " error"):
             pred_label = error_label.get_pred_label()
-            gt_label = error_label.get_gt_unmatch_label()
-            image_name = error_label.get_image_name()
-
-            pred_bboxes = []
-            pred_category_name = self.categories.get(pred_label.get_category_id())
-            pred_bbox = pred_label.get_bbox()
-            pred_confidence = float("{:.2f}".format(pred_label.get_confidence() * 100))
-            pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
-
-            gt_bboxes = []
-            gt_category_name = self.categories.get(gt_label.get_category_id())
-            gt_bbox = gt_label.get_bbox()
-            gt_confidence = ""
-            gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
-            new_file_path = (
-                output_dir
-                + "/"
-                + image_name.split(".")[0]
-                + "_"
-                + error_label.get_error_type()
-                + str(index_dict.get(image_name, 1))
-                + "."
-                + image_name.split(".")[1]
-            )
-            Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index_dict[image_name] = index_dict.get(image_name, 1) + 1
-
-    def output_location_error_files(self, image_dir: str):
-        output_dir = "./_error"
-        os.makedirs(output_dir, exist_ok=True)
-
-        # location error
-        index_dict = {}
-        for error_label in tqdm(self.location_error_labels, "Loc error"):
-            pred_label = error_label.get_pred_label()
+            if error_type == Const.ERROR_TYPE_MISS:
+                pred_label = None
             gt_label = error_label.get_gt_match_label()
+            if error_type == Const.ERROR_TYPE_CLASS or error_type == Const.ERROR_TYPE_BOTH:
+                gt_label = error_label.get_gt_unmatch_label()
+            elif error_type == Const.ERROR_TYPE_BACKGROUND:
+                gt_label = None
             image_name = error_label.get_image_name()
 
             pred_bboxes = []
-            pred_category_name = self.categories.get(pred_label.get_category_id())
-            pred_bbox = pred_label.get_bbox()
-            pred_confidence = float("{:.2f}".format(pred_label.get_confidence() * 100))
+            if not pred_label:
+                pred_category_name = ""
+                pred_bbox = [0, 0, 0, 0]
+                pred_confidence = 0
+            else:
+                pred_category_name = self.categories.get(pred_label.get_category_id())
+                pred_bbox = pred_label.get_bbox()
+                pred_confidence = float("{:.2f}".format(pred_label.get_confidence() * 100))
             pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
 
             gt_bboxes = []
-            gt_category_name = self.categories.get(gt_label.get_category_id())
-            gt_bbox = gt_label.get_bbox()
-            gt_confidence = ""
+            if not gt_label:
+                gt_category_name = ""
+                gt_bbox = [0, 0, 0, 0]
+                gt_confidence = 0
+            else:
+                gt_category_name = self.categories.get(gt_label.get_category_id())
+                gt_bbox = gt_label.get_bbox()
+                gt_confidence = ""
             gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
+
             new_file_path = (
                 output_dir
                 + "/"
@@ -408,177 +323,3 @@ class ImagePrinter:
             )
             Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
-
-    def output_duplicate_error_files(self, image_dir: str):
-        output_dir = "./_error"
-        os.makedirs(output_dir, exist_ok=True)
-
-        # duplicate error
-        index_dict = {}
-        for error_label in tqdm(self.duplicate_error_labels, "Dupe error"):
-            pred_label = error_label.get_pred_label()
-            gt_label = error_label.get_gt_match_label()
-            image_name = error_label.get_image_name()
-
-            pred_bboxes = []
-            pred_category_name = self.categories.get(pred_label.get_category_id())
-            pred_bbox = pred_label.get_bbox()
-            pred_confidence = float("{:.2f}".format(pred_label.get_confidence() * 100))
-            pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
-
-            gt_bboxes = []
-            gt_category_name = self.categories.get(gt_label.get_category_id())
-            gt_bbox = gt_label.get_bbox()
-            gt_confidence = ""
-            gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
-            new_file_path = (
-                output_dir
-                + "/"
-                + image_name.split(".")[0]
-                + "_"
-                + error_label.get_error_type()
-                + str(index_dict.get(image_name, 1))
-                + "."
-                + image_name.split(".")[1]
-            )
-            Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index_dict[image_name] = index_dict.get(image_name, 1) + 1
-
-    def output_background_error_files(self, image_dir: str):
-        output_dir = "./_error"
-        os.makedirs(output_dir, exist_ok=True)
-
-        # background error
-        index_dict = {}
-        for error_label in tqdm(self.background_error_labels, desc="Bkg error"):
-            pred_label = error_label.get_pred_label()
-            gt_label = None
-            image_name = error_label.get_image_name()
-
-            pred_bboxes = []
-            pred_category_name = self.categories.get(pred_label.get_category_id())
-            pred_bbox = pred_label.get_bbox()
-            pred_confidence = float("{:.2f}".format(pred_label.get_confidence() * 100))
-            pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
-
-            gt_bboxes = []
-            gt_category_name = ""
-            gt_bbox = [0, 0, 0, 0]
-            gt_confidence = 0
-            gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
-            new_file_path = (
-                output_dir
-                + "/"
-                + image_name.split(".")[0]
-                + "_"
-                + error_label.get_error_type()
-                + str(index_dict.get(image_name, 1))
-                + "."
-                + image_name.split(".")[1]
-            )
-            Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index_dict[image_name] = index_dict.get(image_name, 1) + 1
-
-    def output_miss_error_files(self, image_dir: str):
-        output_dir = "./_error"
-        os.makedirs(output_dir, exist_ok=True)
-
-        # miss error
-        index_dict = {}
-        for error_label in tqdm(self.miss_error_labels, desc="Miss error"):
-            pred_label = None
-            gt_label = error_label.get_gt_match_label()
-            image_name = error_label.get_image_name()
-
-            pred_bboxes = []
-            pred_category_name = ""
-            pred_bbox = [0, 0, 0, 0]
-            pred_confidence = 0
-            pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
-
-            gt_bboxes = []
-            gt_category_name = self.categories.get(gt_label.get_category_id())
-            gt_bbox = gt_label.get_bbox()
-            gt_confidence = ""
-            gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
-            new_file_path = (
-                output_dir
-                + "/"
-                + image_name.split(".")[0]
-                + "_"
-                + error_label.get_error_type()
-                + str(index_dict.get(image_name, 1))
-                + "."
-                + image_name.split(".")[1]
-            )
-            Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index_dict[image_name] = index_dict.get(image_name, 1) + 1
-
-    def output_both_error_files(self, image_dir: str):
-        output_dir = "./_error"
-        os.makedirs(output_dir, exist_ok=True)
-
-        # both error
-        index_dict = {}
-        for error_label in tqdm(self.both_error_labels, desc="Both error"):
-            pred_label = error_label.get_pred_label()
-            gt_label = error_label.get_gt_unmatch_label()
-            image_name = error_label.get_image_name()
-
-            pred_bboxes = []
-            pred_category_name = self.categories.get(pred_label.get_category_id())
-            pred_bbox = pred_label.get_bbox()
-            pred_confidence = float("{:.2f}".format(pred_label.get_confidence() * 100))
-            pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
-
-            gt_bboxes = []
-            gt_category_name = self.categories.get(gt_label.get_category_id())
-            gt_bbox = gt_label.get_bbox()
-            gt_confidence = ""
-            gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
-            new_file_path = (
-                output_dir
-                + "/"
-                + image_name.split(".")[0]
-                + "_"
-                + error_label.get_error_type()
-                + str(index_dict.get(image_name, 1))
-                + "."
-                + image_name.split(".")[1]
-            )
-            Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
-            index_dict[image_name] = index_dict.get(image_name, 1) + 1
-
-    def output_labeled_images(self, image_dir: str):
-        output_dir = "./_normal"
-        os.makedirs(output_dir, exist_ok=True)
-
-        count = 1
-        images = self.evaluation.get_images()
-        for image in images:
-            image_path = image_dir + "/" + image.get_image_name()
-            print(str(count) + "/" + str(len(images)) + ":" + image_path)
-            pred_bboxes = []
-            gt_bboxes = []
-            for label in image.get_labels():
-                if label.get_pred_label() is not None:
-                    pred_category_name = self.categories.get(
-                        label.get_pred_label().get_category_id()
-                    )
-                    pred_bbox = label.get_pred_label().get_bbox()
-                    pred_confidence = float(
-                        "{:.2f}".format(label.get_pred_label().get_confidence() * 100)
-                    )
-                    pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
-
-                if label.get_gt_match_label() is not None:
-                    gt_category_name = self.categories.get(
-                        label.get_gt_match_label().get_category_id()
-                    )
-                    gt_bbox = label.get_gt_match_label().get_bbox()
-                    gt_confidence = float(1.0)
-                    gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
-
-            new_file_path = output_dir + "/" + Util.get_file_name(image_path)
-            Util.write_label(image_path, new_file_path, pred_bboxes, gt_bboxes, True)
-            count += 1
