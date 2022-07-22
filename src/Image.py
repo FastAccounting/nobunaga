@@ -1,5 +1,6 @@
+from src.utils.Util import *
+
 from .Label import *
-from .Util import *
 
 
 class Image:
@@ -227,6 +228,20 @@ class Image:
         count = 0
         for predicted_label in self.labels:
             if predicted_label.is_true_positive():
+                count += 1
+        return count
+
+    def get_true_negative_count(self):
+        count = 0
+        for predicted_label in self.labels:
+            if predicted_label.is_true_negative():
+                count += 1
+        return count
+
+    def get_false_negative_count(self):
+        count = 0
+        for predicted_label in self.labels:
+            if predicted_label.is_false_negative():
                 count += 1
         return count
 

@@ -15,7 +15,7 @@ See `show_errors2.py` to use the tool.
 
 
 ```bash
-  python3 show_errors2.py \
+  python3 show_coco_errors.py \
     -p coco_instances_results.json \
     -g instances_val.json \
     -i 0.5 \
@@ -24,7 +24,7 @@ See `show_errors2.py` to use the tool.
 
   or
 
-  python3 show_errors2.py \
+  python3 show_coco_errors.py \
     --pred coco_instances_results.json \
     --gt instances_val.json \
     --iou_threshold 0.5 \
@@ -50,7 +50,7 @@ error files with error label
 
 ## show comparison betweeen ground truth and prediction
 ```bash
-python3 show_images.py \
+python3 show_coco_images.py \
   -p coco_instances_results.json \
   -g instances_val.json \
   -i 0.5 \
@@ -59,7 +59,7 @@ python3 show_images.py \
 
 or
 
-python3 show_images.py \
+python3 show_coco_images.py \
   --pred coco_instances_results.json \
   --gt instances_val.json \
   --iou_threshold 0.5 \

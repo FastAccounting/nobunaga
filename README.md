@@ -12,7 +12,7 @@ In addition to the typical TIDE results, each class's confusion matrix and error
 
 
 ```bash
-  python show_errors.py --annotation examples/instances_val2017.json --result examples/coco_instances_results.json
+  python old_show_errors.py --annotation examples/instances_val2017.json --result examples/coco_instances_results.json
 ```
 
 ![Confusion Matrix](examples/coco_result.png)

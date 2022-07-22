@@ -1,4 +1,5 @@
 import argparse
+
 import src.Constants as Const
 from src import Evaluator, GtJson, ImagePrinter, PredJson
 
@@ -42,6 +43,7 @@ def main():
     categories = gt.get_categories()
 
     printer = ImagePrinter(args.model_name, categories, evaluation)
+    printer.output_error_summary(args.model_name)
     printer.output_error_type_matrix(args.normalize, args.model_name)
     # printer.output_per_accuracy_and_errors()
     printer.output_confusion_matrix(args.normalize, args.model_name)
