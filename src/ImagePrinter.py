@@ -1,6 +1,9 @@
 import math
 import os
+from collections import OrderedDict
 
+import cv2
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -9,7 +12,8 @@ from matplotlib.ticker import MultipleLocator
 from tqdm import tqdm
 
 import src.Constants as Const
-from src import Evaluator, Util
+from src import Evaluator
+from src.utils import PlotUtil, Util
 
 
 class ImagePrinter:
@@ -80,50 +84,50 @@ class ImagePrinter:
     def output_error_type_matrix(self, normalize: bool, model_name: str):
         confusion_matrix = {}
         class_count = len(self.categories)
-        error_type_count = len(Const.ERROR_TYPES)
+        error_type_count = len(Const.MAIN_ERRORS)
         # row: ground truth classes, col: error_type
         cm = np.zeros((class_count, error_type_count), dtype=np.int32)
         for error_label in self.class_error_labels:
             category_id = self.index_category_id_relations.get(
                 error_label.get_max_match_category_id(), -1
             )
-            error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
+            error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.location_error_labels:
             category_id = self.index_category_id_relations.get(
                 error_label.get_max_match_category_id(), -1
             )
-            error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
+            error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.duplicate_error_labels:
             category_id = self.index_category_id_relations.get(
                 error_label.get_max_match_category_id(), -1
             )
-            error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
+            error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.background_error_labels:
             category_id = self.index_category_id_relations.get(
                 error_label.get_max_match_category_id(), -1
             )
-            error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
+            error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.miss_error_labels:
             category_id = self.index_category_id_relations.get(
                 error_label.get_max_match_category_id(), -1
             )
-            error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
+            error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.both_error_labels:
             category_id = self.index_category_id_relations.get(
                 error_label.get_max_match_category_id(), -1
             )
-            error_type_id = Const.ERROR_TYPES.index(error_label.get_error_type())
+            error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
 
         # output to terminal
         confusion_matrix[model_name] = cm
         Util.print_table(
-            [["label/error"] + [error_type for error_type in Const.ERROR_TYPES],]
+            [["label/error"] + [error_type for error_type in Const.MAIN_ERRORS],]
             + [
                 [category_name]
                 + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
@@ -136,7 +140,7 @@ class ImagePrinter:
         if normalize:
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
         category_names = [category_name for category, category_name in self.categories.items()]
-        cm = pd.DataFrame(data=confusion_matrix, index=category_names, columns=Const.ERROR_TYPES)
+        cm = pd.DataFrame(data=confusion_matrix, index=category_names, columns=Const.MAIN_ERRORS)
         sns.set(font_scale=0.4)
         fig, axes = plt.subplots(figsize=(10, 8))
         sns.heatmap(
@@ -227,12 +231,12 @@ class ImagePrinter:
                 ]
             total_table.append(rows_items)
 
-        df = pd.DataFrame(total_table, columns=["Name", "AP"] + Const.ERROR_TYPES)
-        maximum_dap = math.ceil(df[Const.ERROR_TYPES].max().max())
+        df = pd.DataFrame(total_table, columns=["Name", "AP"] + Const.MAIN_ERRORS)
+        maximum_dap = math.ceil(df[Const.MAIN_ERRORS].max().max())
 
         sns.set(font_scale=0.4)
         g = sns.PairGrid(
-            df, x_vars=["AP"] + Const.ERROR_TYPES, y_vars=["Name"], height=8, aspect=0.25
+            df, x_vars=["AP"] + Const.MAIN_ERRORS, y_vars=["Name"], height=8, aspect=0.25
         )
         g.map(
             sns.stripplot,
@@ -248,7 +252,7 @@ class ImagePrinter:
             g.axes[0, idx].set_xlim(0, maximum_dap)
             g.axes[0, idx].xaxis.set_major_locator(MultipleLocator(5))
 
-        titles = ["AP"] + Const.ERROR_TYPES
+        titles = ["AP"] + Const.MAIN_ERRORS
         for ax, title in zip(g.axes.flat, titles):
             ax.set(title=title)
             ax.xaxis.grid(False)
@@ -323,3 +327,125 @@ class ImagePrinter:
             )
             Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
+
+    def output_error_summary(self, model_name: str):
+        out_dir = './_result'
+        os.makedirs(out_dir, exist_ok=True)
+
+        mpl.rcParams["figure.dpi"] = 150
+
+        # Seaborn color palette
+        sns.set_palette("muted", 10)
+        current_palette = sns.color_palette()
+
+        # Seaborn style
+        sns.set(style="whitegrid")
+
+        colors_main = OrderedDict(
+            {
+                Const.ERROR_TYPE_CLASS: current_palette[9],
+                Const.ERROR_TYPE_LOCATION: current_palette[8],
+                Const.ERROR_TYPE_BOTH: current_palette[2],
+                Const.ERROR_TYPE_DUPLICATE: current_palette[6],
+                Const.ERROR_TYPE_BACKGROUND: current_palette[4],
+                Const.ERROR_TYPE_MISS: current_palette[3],
+            }
+        )
+
+        colors_special = OrderedDict(
+            {
+                Const.ERROR_FALSE_NEGATIVE: current_palette[0],
+                Const.ERROR_FALSE_POSITIVE: current_palette[1],
+                Const.ERROR_TRUE_POSITIVE: current_palette[2],
+                Const.ERROR_TRUE_NEGATIVE: current_palette[3],
+            }
+        )
+        main_max_scale = max(self.evaluation.get_main_error_distribution())
+        special_max_scale = max(self.evaluation.get_special_error_distribution())
+
+        # Do the plotting now
+        tmp_dir = '_tmp'
+        os.makedirs(tmp_dir, exist_ok=True)
+
+        high_dpi = int(500)
+        low_dpi = int(300)
+
+        # get the data frame
+        main_errors = pd.DataFrame(
+            data={
+                "y": Const.MAIN_ERRORS,
+                "x": self.evaluation.get_main_error_distribution(),
+            }
+        )
+        special_errors = pd.DataFrame(
+            data={
+                "x": Const.SPECIAL_ERRORS,
+                "y": self.evaluation.get_special_error_distribution(),
+            }
+        )
+
+        # pie plot for error type breakdown
+        image_size = len(Const.MAIN_ERRORS) + len(Const.SPECIAL_ERRORS)
+        pie_path = os.path.join(tmp_dir, "{}_{}_main_error_pie.png".format(model_name, Const.MODE_BBOX))
+        PlotUtil.plot_pie(self.evaluation, colors_main, pie_path, high_dpi, low_dpi, 36, image_size)
+        main_bar_path = os.path.join(tmp_dir, "{}_{}_main_error_bar.png".format(model_name, Const.MODE_BBOX))
+        PlotUtil.plot_bar(False, main_errors, colors_main, main_bar_path, Const.MAIN_ERRORS,
+                          main_max_scale, high_dpi, low_dpi, 18, 14)
+        special_bar_path = os.path.join(tmp_dir, "{}_{}_special_error_bar.png".format(model_name, Const.MODE_BBOX))
+        PlotUtil.plot_bar(True, special_errors, colors_special, special_bar_path, Const.SPECIAL_ERRORS,
+                          special_max_scale, high_dpi, low_dpi, 18, 14)
+
+        # get each subplot image
+        pie_im = cv2.imread(pie_path)
+        main_bar_im = cv2.imread(main_bar_path)
+        special_bar_im = cv2.imread(special_bar_path)
+
+        # pad the hbar image vertically
+        main_bar_im = np.concatenate(
+            [np.zeros((special_bar_im.shape[0] - main_bar_im.shape[0], main_bar_im.shape[1], 3)) + 255, main_bar_im],
+            axis=0,
+        )
+        summary_im = np.concatenate([main_bar_im, special_bar_im], axis=1)
+
+        # pad summary_im
+        if summary_im.shape[1] < pie_im.shape[1]:
+            lpad, rpad = int(np.ceil((pie_im.shape[1] - summary_im.shape[1]) / 2)), int(
+                np.floor((pie_im.shape[1] - summary_im.shape[1]) / 2)
+            )
+            summary_im = np.concatenate(
+                [
+                    np.zeros((summary_im.shape[0], lpad, 3)) + 255,
+                    summary_im,
+                    np.zeros((summary_im.shape[0], rpad, 3)) + 255,
+                ],
+                axis=1,
+            )
+
+        # pad pie_im
+        else:
+            lpad, rpad = int(np.ceil((summary_im.shape[1] - pie_im.shape[1]) / 2)), int(
+                np.floor((summary_im.shape[1] - pie_im.shape[1]) / 2)
+            )
+            pie_im = np.concatenate(
+                [
+                    np.zeros((pie_im.shape[0], lpad, 3)) + 255,
+                    pie_im,
+                    np.zeros((pie_im.shape[0], rpad, 3)) + 255,
+                ],
+                axis=1,
+            )
+
+        summary_im = np.concatenate([pie_im, summary_im], axis=0)
+
+        if out_dir is None:
+            fig = plt.figure()
+            ax = plt.axes([0, 0, 1, 1])
+            ax.set_axis_off()
+            fig.add_axes(ax)
+            ax.imshow((summary_im / 255)[:, :, (2, 1, 0)])
+            plt.show()
+            plt.close()
+        else:
+            cv2.imwrite(
+                os.path.join(out_dir, "{}_{}_summary.png".format(model_name, Const.MODE_BBOX)), summary_im
+            )

@@ -1,8 +1,8 @@
 import src.Constants as Const
+from src.utils.Util import *
 
 from .GtLabel import *
 from .PredLabel import *
-from .Util import *
 
 
 class Label:
@@ -116,16 +116,16 @@ class Label:
         )
 
     def is_true_positive(self):
-        return (
-            self.get_max_match_iou() > self.get_max_unmatch_iou()
-            and self.get_max_match_iou() > self.iou_threshold
-        )
+        return self.get_max_match_iou() > self.iou_threshold
 
     def is_false_positive(self):
-        return (
-            self.get_max_match_iou() > self.get_max_unmatch_iou()
-            and self.get_max_match_iou() > self.iou_threshold
-        )
+        return self.get_max_unmatch_iou() > self.iou_threshold
+
+    def is_false_negative(self):
+        return self.iou_threshold > self.get_max_match_iou()
+
+    def is_true_negative(self):
+        return self.iou_threshold > self.get_max_unmatch_iou()
 
     def get_error_type(self):
         if self.is_class_error():
