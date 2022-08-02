@@ -1,6 +1,7 @@
 import math
 import os
 from collections import OrderedDict
+from pathlib import Path
 
 import cv2
 import matplotlib as mpl
@@ -314,16 +315,17 @@ class ImagePrinter:
                 gt_bbox = gt_label.get_bbox()
                 gt_confidence = ""
             gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
+            image_name_path = Path(image_name)
 
             new_file_path = (
                 output_dir
                 + "/"
-                + image_name.split(".")[0]
+                + image_name_path.stem
                 + "_"
                 + error_label.get_error_type()
                 + str(index_dict.get(image_name, 1))
-                + "."
-                + image_name.split(".")[1]
+                + "_"
+                + image_name_path.suffix
             )
             Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
