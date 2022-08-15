@@ -1,5 +1,4 @@
 import math
-import os
 from collections import OrderedDict
 from pathlib import Path
 
@@ -330,8 +329,8 @@ class ImagePrinter:
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
 
     def output_error_summary(self):
-        out_dir = "./_result"
-        os.makedirs(out_dir, exist_ok=True)
+        out_dir = Path("./_result")
+        out_dir.mkdir(exist_ok=True)
 
         mpl.rcParams["figure.dpi"] = 150
 
@@ -365,8 +364,8 @@ class ImagePrinter:
         special_max_scale = max(self.evaluation.get_special_error_distribution())
 
         # Do the plotting now
-        tmp_dir = "_tmp"
-        os.makedirs(tmp_dir, exist_ok=True)
+        tmp_dir = Path("_tmp")
+        tmp_dir.mkdir(exist_ok=True)
 
         high_dpi = int(500)
         low_dpi = int(300)
@@ -387,12 +386,12 @@ class ImagePrinter:
 
         # pie plot for error type breakdown
         image_size = len(Const.MAIN_ERRORS) + len(Const.SPECIAL_ERRORS)
-        pie_path = os.path.join(
-            tmp_dir, "{}_{}_main_error_pie.png".format(self.model_name, Const.MODE_BBOX)
+        pie_path = str(
+            tmp_dir / "{}_{}_main_error_pie.png".format(self.model_name, Const.MODE_BBOX)
         )
         PlotUtil.plot_pie(self.evaluation, colors_main, pie_path, high_dpi, low_dpi, 36, image_size)
-        main_bar_path = os.path.join(
-            tmp_dir, "{}_{}_main_error_bar.png".format(self.model_name, Const.MODE_BBOX)
+        main_bar_path = str(
+            tmp_dir / "{}_{}_main_error_bar.png".format(self.model_name, Const.MODE_BBOX)
         )
         PlotUtil.plot_bar(
             False,
@@ -406,8 +405,8 @@ class ImagePrinter:
             18,
             14,
         )
-        special_bar_path = os.path.join(
-            tmp_dir, "{}_{}_special_error_bar.png".format(self.model_name, Const.MODE_BBOX)
+        special_bar_path = str(
+            tmp_dir / "{}_{}_special_error_bar.png".format(self.model_name, Const.MODE_BBOX)
         )
         PlotUtil.plot_bar(
             True,
@@ -478,6 +477,6 @@ class ImagePrinter:
             plt.close()
         else:
             cv2.imwrite(
-                os.path.join(out_dir, "{}_{}_summary.png".format(self.model_name, Const.MODE_BBOX)),
+                str(out_dir / "{}_{}_summary.png".format(self.model_name, Const.MODE_BBOX)),
                 summary_im,
             )
