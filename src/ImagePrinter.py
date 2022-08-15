@@ -80,7 +80,7 @@ class ImagePrinter:
         plt.xlabel("Predict", fontsize=13)
         plt.ylabel("GT", fontsize=13)
         fig.subplots_adjust(bottom=0.15)
-        plt.savefig("_class_error_confusion_matrix.png")
+        plt.savefig(f"{self.model_name}_class_error_confusion_matrix.png")
 
     def output_error_type_matrix(self, normalize: bool):
         confusion_matrix = {}
@@ -159,7 +159,7 @@ class ImagePrinter:
         plt.xlabel("Error", fontsize=13)
         plt.ylabel("Label", fontsize=13)
         fig.subplots_adjust(bottom=0.15)
-        plt.savefig("_error_type_confusion_matrix.png")
+        plt.savefig(f"{self.model_name}_error_type_confusion_matrix.png")
 
     def output_per_accuracy_and_errors(self):
         total_table = []
