@@ -81,7 +81,8 @@ class ImagePrinter:
         fig.subplots_adjust(bottom=0.15)
         plt.savefig(f"{self.model_name}_class_error_confusion_matrix.png")
 
-    def output_error_type_matrix(self, normalize: bool):
+    #def output_error_type_matrix(self, normalize: bool):
+    def output_error_type_detail(self, normalize: bool, mode: list=['confusion_matrix', 'strip']):
         confusion_matrix = {}
         class_count = len(self.categories)
         error_type_count = len(Const.MAIN_ERRORS)
@@ -126,6 +127,7 @@ class ImagePrinter:
 
         # output to terminal
         confusion_matrix[self.model_name] = cm
+
         Util.print_table(
             [
                 ["label/error"] + [error_type for error_type in Const.MAIN_ERRORS],
@@ -143,126 +145,58 @@ class ImagePrinter:
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
         category_names = [category_name for category, category_name in self.categories.items()]
         cm = pd.DataFrame(data=confusion_matrix, index=category_names, columns=Const.MAIN_ERRORS)
-        sns.set(font_scale=0.4)
-        fig, axes = plt.subplots(figsize=(10, 8))
-        sns.heatmap(
-            cm,
-            square=True,
-            cbar=True,
-            annot=False,
-            cmap="Blues",
-            xticklabels=True,
-            yticklabels=True,
-            linewidths=0.5,
-        )
-        plt.xlabel("Error", fontsize=13)
-        plt.ylabel("Label", fontsize=13)
-        fig.subplots_adjust(bottom=0.15)
-        plt.savefig(f"{self.model_name}_error_type_confusion_matrix.png")
+        cm.index.name = 'Label'
 
-    def output_per_accuracy_and_errors(self):
-        total_table = []
-        for category_id, category_name in self.categories.items():
-            true_positive_count = self.evaluation.get_true_positive_by_category_id(category_id)
-            class_error_count = len(self.evaluation.get_class_errors_by_category_id(category_id))
-            location_error_count = len(
-                self.evaluation.get_location_errors_by_category_id(category_id)
+        if 'confusion_matrix' in mode:
+            sns.set(font_scale=0.4)
+            fig, axes = plt.subplots(figsize=(10, 8))
+            sns.heatmap(
+                cm,
+                square=True,
+                cbar=True,
+                annot=False,
+                cmap="Blues",
+                xticklabels=True,
+                yticklabels=True,
+                linewidths=0.5,
             )
-            both_error_count = len(self.evaluation.get_both_errors_by_category_id(category_id))
-            duplicate_error_count = len(
-                self.evaluation.get_duplicate_errors_by_category_id(category_id)
+            plt.xlabel("Error", fontsize=13)
+            plt.ylabel("Label", fontsize=13)
+            fig.subplots_adjust(bottom=0.15)
+            plt.savefig(f"{self.model_name}_error_type_confusion_matrix.png")
+
+        if 'strip' in mode:
+            grid_cm = cm.reset_index()
+            maximum_dap = math.ceil(cm[Const.MAIN_ERRORS].max().max())
+            sns.set(font_scale=0.4)
+            g = sns.PairGrid(
+                grid_cm,
+                x_vars=Const.MAIN_ERRORS,
+                y_vars=["Label"],
+                height=8,
+                aspect=0.25,
             )
-            background_error_count = len(
-                self.evaluation.get_background_errors_by_category_id(category_id)
+            g.map(
+                sns.stripplot,
+                size=8,
+                orient="h",
+                jitter=False,
+                palette="flare_r",
+                linewidth=1,
+                edgecolor="w",
             )
-            miss_error_count = len(self.evaluation.get_miss_errors_by_category_id(category_id))
 
-            # class error
-            all_count = (
-                class_error_count
-                + location_error_count
-                + both_error_count
-                + duplicate_error_count
-                + background_error_count
-                + miss_error_count
-                + true_positive_count
-            )
-            if all_count == 0:
-                rows_items = [category_name, 0, 0, 0, 0, 0, 0, 0]
-            else:
-                precision = true_positive_count / all_count
-                class_precision = (
-                    0
-                    if class_error_count + true_positive_count == 0
-                    else true_positive_count / (class_error_count + true_positive_count)
-                )
-                location_precision = (
-                    0
-                    if location_error_count + true_positive_count == 0
-                    else true_positive_count / (location_error_count + true_positive_count)
-                )
-                both_precision = (
-                    0
-                    if both_error_count + true_positive_count == 0
-                    else true_positive_count / (both_error_count + true_positive_count)
-                )
-                duplicate_precision = (
-                    0
-                    if duplicate_error_count + true_positive_count == 0
-                    else true_positive_count / (duplicate_error_count + true_positive_count)
-                )
-                background_precision = (
-                    0
-                    if background_error_count + true_positive_count == 0
-                    else true_positive_count / (background_error_count + true_positive_count)
-                )
-                miss_precision = (
-                    0
-                    if miss_error_count + true_positive_count == 0
-                    else true_positive_count / (miss_error_count + true_positive_count)
-                )
-                rows_items = [
-                    category_name,
-                    precision,
-                    class_precision,
-                    location_precision,
-                    both_precision,
-                    duplicate_precision,
-                    background_precision,
-                    miss_precision,
-                ]
-            total_table.append(rows_items)
+            for idx in range(g.axes.shape[1]):
+                g.axes[0, idx].set_xlim(0, maximum_dap)
 
-        df = pd.DataFrame(total_table, columns=["Name", "AP"] + Const.MAIN_ERRORS)
-        maximum_dap = math.ceil(df[Const.MAIN_ERRORS].max().max())
+            for ax, title in zip(g.axes.flat, Const.MAIN_ERRORS):
+                ax.set(title=title)
+                ax.xaxis.grid(False)
+                ax.yaxis.grid(True)
+            sns.despine(left=True, bottom=True)
+            plt.subplots_adjust(left=0.12, top=0.98)
+            plt.savefig(f"{self.model_name}_error_type_strip.png")
 
-        sns.set(font_scale=0.4)
-        g = sns.PairGrid(
-            df, x_vars=["AP"] + Const.MAIN_ERRORS, y_vars=["Name"], height=8, aspect=0.25
-        )
-        g.map(
-            sns.stripplot,
-            size=8,
-            orient="h",
-            jitter=False,
-            palette="flare_r",
-            linewidth=1,
-            edgecolor="w",
-        )
-        g.axes[0, 0].set_xlim(0, 100)
-        for idx in range(1, g.axes.shape[1]):
-            g.axes[0, idx].set_xlim(0, maximum_dap)
-            g.axes[0, idx].xaxis.set_major_locator(MultipleLocator(5))
-
-        titles = ["AP"] + Const.MAIN_ERRORS
-        for ax, title in zip(g.axes.flat, titles):
-            ax.set(title=title)
-            ax.xaxis.grid(False)
-            ax.yaxis.grid(True)
-
-        sns.despine(left=True, bottom=True)
-        plt.subplots_adjust(left=0.05, top=0.98)
-        plt.savefig("_per_accuracy_and_errors.png")
 
     def output_error_files(self, image_dir: str, error_type: str):
         image_dir = Path(image_dir)
