@@ -32,12 +32,17 @@ def main():
     printer.output_error_summary()
     printer.output_error_type_matrix(args.normalize)
     printer.output_confusion_matrix(args.normalize)
-    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_CLASS)
-    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_LOCATION)
-    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_DUPLICATE)
-    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_BACKGROUND)
-    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_MISS)
-    printer.output_error_files(args.image_dir, Const.ERROR_TYPE_BOTH)
+    error_types = [
+        Const.ERROR_TYPE_CLASS,
+        Const.ERROR_TYPE_LOCATION,
+        Const.ERROR_TYPE_DUPLICATE,
+        Const.ERROR_TYPE_BACKGROUND,
+        Const.ERROR_TYPE_MISS,
+        Const.ERROR_TYPE_BOTH,
+    ]
+
+    for error_type in error_types:
+        printer.output_error_files(args.image_dir, error_type)
 
 
 if __name__ == "__main__":
