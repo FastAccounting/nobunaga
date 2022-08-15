@@ -43,10 +43,9 @@ def main():
     categories = gt.get_categories()
 
     printer = ImagePrinter(args.model_name, categories, evaluation)
-    printer.output_error_summary(args.model_name)
-    printer.output_error_type_matrix(args.normalize, args.model_name)
-    # printer.output_per_accuracy_and_errors()
-    printer.output_confusion_matrix(args.normalize, args.model_name)
+    printer.output_error_summary()
+    printer.output_error_type_matrix(args.normalize)
+    printer.output_confusion_matrix(args.normalize)
     printer.output_error_files(args.image_dir, Const.ERROR_TYPE_CLASS)
     printer.output_error_files(args.image_dir, Const.ERROR_TYPE_LOCATION)
     printer.output_error_files(args.image_dir, Const.ERROR_TYPE_DUPLICATE)

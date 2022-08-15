@@ -32,7 +32,7 @@ class ImagePrinter:
         for index, category_id in enumerate(self.categories.keys()):
             self.index_category_id_relations[category_id] = index
 
-    def output_confusion_matrix(self, normalize: bool, model_name: str):
+    def output_confusion_matrix(self, normalize: bool):
         confusion_matrix = {}
         class_count = len(self.categories)
         # row: predicted classes, col: actual classes
@@ -46,7 +46,7 @@ class ImagePrinter:
                 pass
 
         # output to terminal
-        confusion_matrix[model_name] = cm
+        confusion_matrix[self.model_name] = cm
         Util.print_table(
             [
                 ["pred/gt"]
@@ -57,9 +57,9 @@ class ImagePrinter:
                 + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id, -1)]]
                 for category_id, category_name in self.categories.items()
             ],
-            title=f"{model_name} confusion matrix",
+            title=f"{self.model_name} confusion matrix",
         )
-        confusion_matrix = confusion_matrix[model_name].T
+        confusion_matrix = confusion_matrix[self.model_name].T
 
         if normalize:
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
@@ -82,7 +82,7 @@ class ImagePrinter:
         fig.subplots_adjust(bottom=0.15)
         plt.savefig("_class_error_confusion_matrix.png")
 
-    def output_error_type_matrix(self, normalize: bool, model_name: str):
+    def output_error_type_matrix(self, normalize: bool):
         confusion_matrix = {}
         class_count = len(self.categories)
         error_type_count = len(Const.MAIN_ERRORS)
@@ -126,7 +126,7 @@ class ImagePrinter:
             cm[category_id][error_type_id] += 1
 
         # output to terminal
-        confusion_matrix[model_name] = cm
+        confusion_matrix[self.model_name] = cm
         Util.print_table(
             [
                 ["label/error"] + [error_type for error_type in Const.MAIN_ERRORS],
@@ -136,9 +136,9 @@ class ImagePrinter:
                 + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
                 for category_id, category_name in self.categories.items()
             ],
-            title=f"{model_name} error type matrix",
+            title=f"{self.model_name} error type matrix",
         )
-        confusion_matrix = confusion_matrix[model_name]
+        confusion_matrix = confusion_matrix[self.model_name]
 
         if normalize:
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
@@ -329,7 +329,7 @@ class ImagePrinter:
             )
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
 
-    def output_error_summary(self, model_name: str):
+    def output_error_summary(self):
         out_dir = "./_result"
         os.makedirs(out_dir, exist_ok=True)
 
@@ -388,11 +388,11 @@ class ImagePrinter:
         # pie plot for error type breakdown
         image_size = len(Const.MAIN_ERRORS) + len(Const.SPECIAL_ERRORS)
         pie_path = os.path.join(
-            tmp_dir, "{}_{}_main_error_pie.png".format(model_name, Const.MODE_BBOX)
+            tmp_dir, "{}_{}_main_error_pie.png".format(self.model_name, Const.MODE_BBOX)
         )
         PlotUtil.plot_pie(self.evaluation, colors_main, pie_path, high_dpi, low_dpi, 36, image_size)
         main_bar_path = os.path.join(
-            tmp_dir, "{}_{}_main_error_bar.png".format(model_name, Const.MODE_BBOX)
+            tmp_dir, "{}_{}_main_error_bar.png".format(self.model_name, Const.MODE_BBOX)
         )
         PlotUtil.plot_bar(
             False,
@@ -407,7 +407,7 @@ class ImagePrinter:
             14,
         )
         special_bar_path = os.path.join(
-            tmp_dir, "{}_{}_special_error_bar.png".format(model_name, Const.MODE_BBOX)
+            tmp_dir, "{}_{}_special_error_bar.png".format(self.model_name, Const.MODE_BBOX)
         )
         PlotUtil.plot_bar(
             True,
@@ -478,6 +478,6 @@ class ImagePrinter:
             plt.close()
         else:
             cv2.imwrite(
-                os.path.join(out_dir, "{}_{}_summary.png".format(model_name, Const.MODE_BBOX)),
+                os.path.join(out_dir, "{}_{}_summary.png".format(self.model_name, Const.MODE_BBOX)),
                 summary_im,
             )
