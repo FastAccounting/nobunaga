@@ -9,10 +9,16 @@ from src import Evaluator
 
 
 class PlotUtil:
-
     @staticmethod
-    def plot_pie(evaluation: Evaluator, colors_main: OrderedDict, pie_path: str,
-                 high_dpi: int, low_dpi: int, font_size: int, image_size:int):
+    def plot_pie(
+        evaluation: Evaluator,
+        colors_main: OrderedDict,
+        pie_path: str,
+        high_dpi: int,
+        low_dpi: int,
+        font_size: int,
+        image_size: int,
+    ):
 
         # pie plot for error type breakdown
         error_sizes = evaluation.get_main_error_distribution()
@@ -36,8 +42,18 @@ class PlotUtil:
         plt.close()
 
     @staticmethod
-    def plot_bar(is_vertical: bool, data: DataFrame, colors: OrderedDict, bar_path: str, title_labels: list,
-                 max_scale: int, high_dpi: int, low_dpi: int, title_size: int, scale_size: int):
+    def plot_bar(
+        is_vertical: bool,
+        data: DataFrame,
+        colors: OrderedDict,
+        bar_path: str,
+        title_labels: list,
+        max_scale: int,
+        high_dpi: int,
+        low_dpi: int,
+        title_size: int,
+        scale_size: int,
+    ):
 
         fig, ax = plt.subplots(1, 1, figsize=(len(title_labels), 5), dpi=high_dpi)
         sns.barplot(
