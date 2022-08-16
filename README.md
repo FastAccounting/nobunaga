@@ -1,4 +1,4 @@
-# Nobunaga
+# Nobunaga: Object Detection Analyzer
 Nobunaga is a Object Detection Analysis tool in Computer Vision.
 Based on [TIDE](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123480562.pdf), which is one of the great error analysis algorithm,
 Nobunaga exports the overall distribution of detection error in the given dataset as well as per-category error.
@@ -10,11 +10,6 @@ We hope it could be beneficial for you to figure out what kind of detection erro
 ```shell
     pip install git+https://github.com/FastAccounting/nobunaga
 ```
-
-## Usage
-The error analysis tool TIDE has been extended to output errors in each category.
-See `show_errors.py` to use the tool.
-In addition to the typical TIDE results, each class's confusion matrix and error analysis are output.
 
 ### Analize error
 Before analizing detection error, 
