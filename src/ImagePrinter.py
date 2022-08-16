@@ -31,6 +31,9 @@ class ImagePrinter:
         for index, category_id in enumerate(self.categories.keys()):
             self.index_category_id_relations[category_id] = index
 
+        self.out_dir = Path("./_result")
+        self.out_dir.mkdir(exist_ok=True)
+
     def output_confusion_matrix(self, normalize: bool):
         confusion_matrix = {}
         class_count = len(self.categories)
@@ -79,9 +82,8 @@ class ImagePrinter:
         plt.xlabel("Predict", fontsize=13)
         plt.ylabel("GT", fontsize=13)
         fig.subplots_adjust(bottom=0.15)
-        plt.savefig(f"{self.model_name}_class_error_confusion_matrix.png")
+        plt.savefig(str(self.out_dir / f"{self.model_name}_class_error_confusion_matrix.png"))
 
-    #def output_error_type_matrix(self, normalize: bool):
     def output_error_type_detail(self, normalize: bool, mode: list=['confusion_matrix', 'strip']):
         confusion_matrix = {}
         class_count = len(self.categories)
@@ -163,7 +165,7 @@ class ImagePrinter:
             plt.xlabel("Error", fontsize=13)
             plt.ylabel("Label", fontsize=13)
             fig.subplots_adjust(bottom=0.15)
-            plt.savefig(f"{self.model_name}_error_type_confusion_matrix.png")
+            plt.savefig(str(self.out_dir /f"{self.model_name}_error_type_confusion_matrix.png"))
 
         if 'strip' in mode:
             grid_cm = cm.reset_index()
@@ -195,7 +197,7 @@ class ImagePrinter:
                 ax.yaxis.grid(True)
             sns.despine(left=True, bottom=True)
             plt.subplots_adjust(left=0.12, top=0.98)
-            plt.savefig(f"{self.model_name}_error_type_strip.png")
+            plt.savefig(str(self.out_dir / f"{self.model_name}_error_type_strip.png"))
 
 
     def output_error_files(self, image_dir: str, error_type: str):
@@ -263,8 +265,6 @@ class ImagePrinter:
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
 
     def output_error_summary(self):
-        out_dir = Path("./_result")
-        out_dir.mkdir(exist_ok=True)
 
         mpl.rcParams["figure.dpi"] = 150
 
@@ -401,7 +401,7 @@ class ImagePrinter:
 
         summary_im = np.concatenate([pie_im, summary_im], axis=0)
 
-        if out_dir is None:
+        if self.out_dir is None:
             fig = plt.figure()
             ax = plt.axes([0, 0, 1, 1])
             ax.set_axis_off()
@@ -411,6 +411,6 @@ class ImagePrinter:
             plt.close()
         else:
             cv2.imwrite(
-                str(out_dir / "{}_{}_summary.png".format(self.model_name, Const.MODE_BBOX)),
+                str(self.out_dir / "{}_{}_summary.png".format(self.model_name, Const.MODE_BBOX)),
                 summary_im,
             )
