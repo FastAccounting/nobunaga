@@ -41,7 +41,7 @@ class ImagePrinter:
         cm = np.zeros((class_count, class_count), dtype=np.int32)
         for class_error in self.class_error_labels:
             try:
-                gt_category_id = class_error.get_max_match_category_id()
+                gt_category_id = class_error.get_max_unmatch_category_id()
                 pred_category_id = class_error.get_pred_category_id()
                 cm[pred_category_id][gt_category_id] += 1
             except:
