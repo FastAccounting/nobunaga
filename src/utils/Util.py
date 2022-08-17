@@ -252,7 +252,7 @@ def _draw_single_box(
         margin = np.ceil(0.05 * text_height)
 
         box_height = ymax - ymin
-        if text_height < box_height/3:
+        if text_height < box_height / 3:
             text_position = bottom
         else:
             text_position = top

@@ -59,7 +59,7 @@ class ImagePrinter:
             ],
             title=f"{model_name} confusion matrix",
         )
-        confusion_matrix = confusion_matrix[""].T
+        confusion_matrix = confusion_matrix[model_name].T
 
         if normalize:
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
@@ -128,7 +128,9 @@ class ImagePrinter:
         # output to terminal
         confusion_matrix[model_name] = cm
         Util.print_table(
-            [["label/error"] + [error_type for error_type in Const.MAIN_ERRORS],]
+            [
+                ["label/error"] + [error_type for error_type in Const.MAIN_ERRORS],
+            ]
             + [
                 [category_name]
                 + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
@@ -264,8 +266,9 @@ class ImagePrinter:
         plt.savefig("_per_accuracy_and_errors.png")
 
     def output_error_files(self, image_dir: str, error_type: str):
-        output_dir = "./_error"
-        os.makedirs(output_dir, exist_ok=True)
+        image_dir = Path(image_dir)
+        output_dir = Path(f"./{self.model_name}_error")
+        output_dir.mkdir(exist_ok=True)
 
         error_labels = []
         if error_type == Const.ERROR_TYPE_CLASS:
@@ -317,21 +320,17 @@ class ImagePrinter:
             gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
             image_name_path = Path(image_name)
 
-            new_file_path = (
+            new_file_path = str(
                 output_dir
-                + "/"
-                + image_name_path.stem
-                + "_"
-                + error_label.get_error_type()
-                + str(index_dict.get(image_name, 1))
-                + "_"
-                + image_name_path.suffix
+                / f"{image_name_path.stem}_{error_label.get_error_type()}_{str(index_dict.get(image_name, 1))}{image_name_path.suffix}"
             )
-            Util.write_label(image_dir + image_name, new_file_path, pred_bboxes, gt_bboxes, True)
+            Util.write_label(
+                str(image_dir / image_name), new_file_path, pred_bboxes, gt_bboxes, True
+            )
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
 
     def output_error_summary(self, model_name: str):
-        out_dir = './_result'
+        out_dir = "./_result"
         os.makedirs(out_dir, exist_ok=True)
 
         mpl.rcParams["figure.dpi"] = 150
@@ -366,7 +365,7 @@ class ImagePrinter:
         special_max_scale = max(self.evaluation.get_special_error_distribution())
 
         # Do the plotting now
-        tmp_dir = '_tmp'
+        tmp_dir = "_tmp"
         os.makedirs(tmp_dir, exist_ok=True)
 
         high_dpi = int(500)
@@ -388,14 +387,40 @@ class ImagePrinter:
 
         # pie plot for error type breakdown
         image_size = len(Const.MAIN_ERRORS) + len(Const.SPECIAL_ERRORS)
-        pie_path = os.path.join(tmp_dir, "{}_{}_main_error_pie.png".format(model_name, Const.MODE_BBOX))
+        pie_path = os.path.join(
+            tmp_dir, "{}_{}_main_error_pie.png".format(model_name, Const.MODE_BBOX)
+        )
         PlotUtil.plot_pie(self.evaluation, colors_main, pie_path, high_dpi, low_dpi, 36, image_size)
-        main_bar_path = os.path.join(tmp_dir, "{}_{}_main_error_bar.png".format(model_name, Const.MODE_BBOX))
-        PlotUtil.plot_bar(False, main_errors, colors_main, main_bar_path, Const.MAIN_ERRORS,
-                          main_max_scale, high_dpi, low_dpi, 18, 14)
-        special_bar_path = os.path.join(tmp_dir, "{}_{}_special_error_bar.png".format(model_name, Const.MODE_BBOX))
-        PlotUtil.plot_bar(True, special_errors, colors_special, special_bar_path, Const.SPECIAL_ERRORS,
-                          special_max_scale, high_dpi, low_dpi, 18, 14)
+        main_bar_path = os.path.join(
+            tmp_dir, "{}_{}_main_error_bar.png".format(model_name, Const.MODE_BBOX)
+        )
+        PlotUtil.plot_bar(
+            False,
+            main_errors,
+            colors_main,
+            main_bar_path,
+            Const.MAIN_ERRORS,
+            main_max_scale,
+            high_dpi,
+            low_dpi,
+            18,
+            14,
+        )
+        special_bar_path = os.path.join(
+            tmp_dir, "{}_{}_special_error_bar.png".format(model_name, Const.MODE_BBOX)
+        )
+        PlotUtil.plot_bar(
+            True,
+            special_errors,
+            colors_special,
+            special_bar_path,
+            Const.SPECIAL_ERRORS,
+            special_max_scale,
+            high_dpi,
+            low_dpi,
+            18,
+            14,
+        )
 
         # get each subplot image
         pie_im = cv2.imread(pie_path)
@@ -404,7 +429,11 @@ class ImagePrinter:
 
         # pad the hbar image vertically
         main_bar_im = np.concatenate(
-            [np.zeros((special_bar_im.shape[0] - main_bar_im.shape[0], main_bar_im.shape[1], 3)) + 255, main_bar_im],
+            [
+                np.zeros((special_bar_im.shape[0] - main_bar_im.shape[0], main_bar_im.shape[1], 3))
+                + 255,
+                main_bar_im,
+            ],
             axis=0,
         )
         summary_im = np.concatenate([main_bar_im, special_bar_im], axis=1)
@@ -449,5 +478,6 @@ class ImagePrinter:
             plt.close()
         else:
             cv2.imwrite(
-                os.path.join(out_dir, "{}_{}_summary.png".format(model_name, Const.MODE_BBOX)), summary_im
+                os.path.join(out_dir, "{}_{}_summary.png".format(model_name, Const.MODE_BBOX)),
+                summary_im,
             )
