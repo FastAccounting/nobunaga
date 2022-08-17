@@ -30,7 +30,7 @@ def main():
 
     printer = ImagePrinter(args.model_name, categories, evaluation)
     printer.output_error_summary()
-    printer.output_error_type_matrix(args.normalize)
+    printer.output_error_type_detail(args.normalize, mode=['confusion_matrix', 'strip'])
     printer.output_confusion_matrix(args.normalize)
     for error_type in Const.MAIN_ERRORS:
         printer.output_error_files(args.image_dir, error_type)
