@@ -1,9 +1,9 @@
 from collections import OrderedDict
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 from pandas import DataFrame
-import pandas as pd
 
 import src.Constants as Const
 from src import Evaluator
@@ -86,12 +86,12 @@ class PlotUtil:
 
     @staticmethod
     def plot_matrix(
-            confusion_matrix: list[list],
-            rows: list,
-            columns: list,
-            x_title: str,
-            y_title: str,
-            output_file_path: str
+        confusion_matrix: list[list],
+        rows: list,
+        columns: list,
+        x_title: str,
+        y_title: str,
+        output_file_path: str,
     ):
         cm = pd.DataFrame(data=confusion_matrix, index=rows, columns=columns)
         sns.set(font_scale=0.4)

@@ -55,8 +55,7 @@ class ImagePrinter:
                 + [category_name for category_id, category_name in self.categories.items()],
             ]
             + [
-                [category_name]
-                + [str(cnt) for cnt in cm[category_id]]
+                [category_name] + [str(cnt) for cnt in cm[category_id]]
                 for category_id, category_name in self.categories.items()
             ],
             title=f"{self.model_name} confusion matrix",
@@ -69,15 +68,17 @@ class ImagePrinter:
         category_names = []
         for category_id, category_name in self.categories.items():
             while category_id > category_index:
-                category_names.append('')
+                category_names.append("")
                 category_index += 1
             category_names.append(category_name)
             category_index += 1
 
         output_file_path = str(self.out_dir / f"{self.model_name}_class_error_confusion_matrix.png")
-        PlotUtil.plot_matrix(confusion_matrix, category_names, category_names, "Pred", "Gt", output_file_path)
+        PlotUtil.plot_matrix(
+            confusion_matrix, category_names, category_names, "Pred", "Gt", output_file_path
+        )
 
-    def output_error_type_detail(self, normalize: bool, mode: list=['confusion_matrix', 'strip']):
+    def output_error_type_detail(self, normalize: bool, mode: list = ["confusion_matrix", "strip"]):
         confusion_matrix = {}
         class_count = max(self.categories) + 1
         error_type_count = len(Const.MAIN_ERRORS)
@@ -116,8 +117,7 @@ class ImagePrinter:
                 ["label/error"] + [error_type for error_type in Const.MAIN_ERRORS],
             ]
             + [
-                [category_name]
-                + [str(cnt) for cnt in cm[category_id]]
+                [category_name] + [str(cnt) for cnt in cm[category_id]]
                 for category_id, category_name in self.categories.items()
             ],
             title=f"{self.model_name} error type matrix",
@@ -130,18 +130,27 @@ class ImagePrinter:
         category_names = []
         for category_id, category_name in self.categories.items():
             while category_id > category_index:
-                category_names.append('')
+                category_names.append("")
                 category_index += 1
             category_names.append(category_name)
             category_index += 1
         cm = pd.DataFrame(data=confusion_matrix, index=category_names, columns=Const.MAIN_ERRORS)
-        cm.index.name = 'Label'
+        cm.index.name = "Label"
 
-        if 'confusion_matrix' in mode:
-            output_file_path = str(self.out_dir / f"{self.model_name}_error_type_confusion_matrix.png")
-            PlotUtil.plot_matrix(confusion_matrix, category_names, Const.MAIN_ERRORS, "Label", "Error", output_file_path)
+        if "confusion_matrix" in mode:
+            output_file_path = str(
+                self.out_dir / f"{self.model_name}_error_type_confusion_matrix.png"
+            )
+            PlotUtil.plot_matrix(
+                confusion_matrix,
+                category_names,
+                Const.MAIN_ERRORS,
+                "Label",
+                "Error",
+                output_file_path,
+            )
 
-        if 'strip' in mode:
+        if "strip" in mode:
             grid_cm = cm.reset_index()
             maximum_dap = math.ceil(cm[Const.MAIN_ERRORS].max().max())
             sns.set(font_scale=0.4)
