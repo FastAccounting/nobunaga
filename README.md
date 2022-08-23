@@ -35,8 +35,8 @@ Then, you can get the below files
 ![Per-label information](examples/per_class_info.png)
 
 #### Confusion matrix
-Confusion matrix visualizes what label tends to be misclassified as other labels.
-We remark that this confusion matrix visualize only false examples, so correct ones are not included.
+The confusion matrix visualizes what label tends to be misclassified as other labels.
+We remark that this confusion matrix visualizes only false examples, so correct ones are omitted.
 
 ![Confusion Matrix](examples/coco_result.png)
 
