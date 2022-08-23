@@ -59,8 +59,8 @@ class ImagePrinter:
                 + [category_name for category_id, category_name in self.categories.items()],
             ]
             + [
-                [category_name] +
-                [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
+                [category_name]
+                + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
                 for category_id, category_name in self.categories.items()
             ],
             title=f"{self.model_name} confusion matrix",
