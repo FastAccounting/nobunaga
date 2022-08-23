@@ -5,7 +5,7 @@ from os import path
 
 from setuptools import find_packages, setup
 
-package_name = "src"
+package_name = "nobunaga"
 root_dir = path.abspath(path.dirname(__file__))
 
 
@@ -16,7 +16,7 @@ def _requirements():
     ]
 
 
-with open(path.join(root_dir, "src", "__init__.py"), encoding="utf-8") as f:
+with open(path.join(root_dir, package_name, "__init__.py"), encoding="utf-8") as f:
     init_text = f.read()
     version = re.search(r"__version__ = [\'\"](.+?)[\'\"]", init_text).group(1)
     author = re.search(r"__author__ =\s*[\'\"](.+?)[\'\"]", init_text).group(1)
@@ -28,6 +28,7 @@ assert url
 
 with open("README.md", encoding="utf-8") as f:
     long_description = f.read()
+
 
 setup(
     name="nobunaga",
@@ -44,6 +45,6 @@ setup(
     test_suite="tests",
     entry_points="""
     [console_scripts]
-    nobunaga = nobunaga.__main__:main
+        nobunaga = nobunaga.command_line:main
     """,
 )
