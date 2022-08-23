@@ -1,4 +1,4 @@
-from src.utils.Util import *
+from nobunaga.utils.Util import *
 
 from .Label import *
 

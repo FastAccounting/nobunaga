@@ -1,5 +1,5 @@
-import src.Constants as Const
-from src.utils.Util import *
+import nobunaga.Constants as Const
+from nobunaga.utils.Util import *
 
 from .GtLabel import *
 from .PredLabel import *
