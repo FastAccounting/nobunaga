@@ -1,45 +1,49 @@
-import pathlib
+#!usr/bin/env python3
 
-from setuptools import setup
+import re
+from os import path
 
-# The directory containing this file
-HERE = pathlib.Path(__file__).parent
+from setuptools import find_packages, setup
 
-# The text of the README file
-README = (HERE / "README.md").read_text(encoding="utf8")
+package_name = "src"
+root_dir = path.abspath(path.dirname(__file__))
 
-# This call to setup() does all the work
+
+def _requirements():
+    return [
+        name.rstrip()
+        for name in open(path.join(root_dir, "requirements.txt"), encoding="utf-8").readlines()
+    ]
+
+
+with open(path.join(root_dir, "src", "__init__.py"), encoding="utf-8") as f:
+    init_text = f.read()
+    version = re.search(r"__version__ = [\'\"](.+?)[\'\"]", init_text).group(1)
+    author = re.search(r"__author__ =\s*[\'\"](.+?)[\'\"]", init_text).group(1)
+    url = re.search(r"__url__ =\s*[\'\"](.+?)[\'\"]", init_text).group(1)
+
+assert version
+assert author
+assert url
+
+with open("README.md", encoding="utf-8") as f:
+    long_description = f.read()
+
 setup(
-    name="tidecv",
-    version="1.0.1",
-    description="A General Toolbox for Identifying ObjectDetection Errors",
-    long_description=README,
+    name="nobunaga",
+    version=version,
+    description="Nobunaga: Object Detection Analyzer",
+    long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/dbolya/tide",
-    author="Daniel Bolya",
-    author_email="dbolya@gatech.edu",
-    license="MIT",
-    classifiers=[
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Operating System :: OS Independent",
-    ],
-    python_requires=">=3.6",
-    packages=["tidecv", "tidecv.errors"],
+    author=author,
+    url=url,
+    install_requires=_requirements(),
     include_package_data=True,
-    install_requires=[
-        "appdirs",
-        "numpy",
-        "pycocotools",
-        "opencv-python",
-        "seaborn",
-        "pandas",
-        "matplotlib",
-    ],
-    # entry_points={
-    #     "console_scripts": [
-    #         "tidecv=tidecv.__main__:main",
-    #     ]
-    # },
+    license="",
+    packages=find_packages(exclude=("tests")),
+    test_suite="tests",
+    entry_points="""
+    [console_scripts]
+    nobunaga = nobunaga.__main__:main
+    """,
 )
