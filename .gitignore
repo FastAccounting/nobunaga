@@ -10,3 +10,4 @@ src/.DS_Store
 *.csv
 
 __pycache__
+*.egg-info/
