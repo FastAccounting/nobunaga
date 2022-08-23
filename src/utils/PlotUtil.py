@@ -7,6 +7,7 @@ from pandas import DataFrame
 
 import src.Constants as Const
 from src import Evaluator
+from typing import List
 
 
 class PlotUtil:
@@ -86,7 +87,7 @@ class PlotUtil:
 
     @staticmethod
     def plot_matrix(
-        confusion_matrix: list[list],
+        confusion_matrix: List[list],
         rows: list,
         columns: list,
         x_title: str,
