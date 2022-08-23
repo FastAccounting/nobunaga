@@ -1,10 +1,10 @@
 # Nobunaga: Object Detection Analyzer
-Nobunaga is a Object Detection Analysis tool in Computer Vision.
-Based on [TIDE](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123480562.pdf), which is one of the great error analysis algorithm,
+Nobunaga is an Object Detection Analysis tool in Computer Vision.
+Based on [TIDE](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123480562.pdf), which is one of the excellent error analysis algorithms,
 Nobunaga exports the overall distribution of detection error in the given dataset as well as per-category error.
-Towards analying miss classification, Nobunaga plots their error in aconfusion matrix.
-Moreover, it plots detection error in images one by one with annotation.
-We hope it could be beneficial for you to figure out what kind of detection error happends in your models specifically.
+Towards analyzing miss classification, Nobunaga plots their error in a confusion matrix.
+Moreover, it plots detection errors in images one by one with annotation.
+We hope it could be beneficial for you to figure out what kind of detection error happens in your models specifically.
 
 ## Installation
 ```shell
@@ -12,8 +12,8 @@ We hope it could be beneficial for you to figure out what kind of detection erro
 ```
 
 ### Analize error
-Before analizing detection error, 
-you need to prepare ground truth formated in [COCO object dtection](https://cocodataset.org/#home), its corresponding prediction results in JSON and image dataset.
+Before analyzing detection error, 
+you need to prepare ground truth formated in [COCO object dtection](https://cocodataset.org/#home) and its corresponding prediction results in JSON and image dataset.
 
 Command line is as follows:
 ```bash
@@ -25,7 +25,7 @@ Command line is as follows:
     --confidence_threshold 0.7
 ```
 
-Then, you can get below files
+Then, you can get the below files
 - error distribution
 - class error matrix
 - error files with error label
