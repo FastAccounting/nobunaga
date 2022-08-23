@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import List
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -7,7 +8,6 @@ from pandas import DataFrame
 
 import src.Constants as Const
 from src import Evaluator
-from typing import List
 
 
 class PlotUtil:

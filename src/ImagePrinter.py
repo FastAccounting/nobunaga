@@ -41,8 +41,12 @@ class ImagePrinter:
         cm = np.zeros((class_count, class_count), dtype=np.int32)
         for class_error in self.class_error_labels:
             try:
-                gt_category_id = self.index_category_id_relations.get(class_error.get_max_unmatch_category_id())
-                pred_category_id = self.index_category_id_relations.get(class_error.get_pred_category_id())
+                gt_category_id = self.index_category_id_relations.get(
+                    class_error.get_max_unmatch_category_id(), -1
+                )
+                pred_category_id = self.index_category_id_relations.get(
+                    class_error.get_pred_category_id(), -1
+                )
                 cm[pred_category_id][gt_category_id] += 1
             except:
                 pass
@@ -52,7 +56,7 @@ class ImagePrinter:
         Util.print_table(
             [
                 ["pred/gt"]
-                + [category_name for category_id, category_name in self.categories.items()],
+                + [category_name for category, category_name in self.categories.items()],
             ]
             + [
                 [category_name] + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
@@ -77,27 +81,39 @@ class ImagePrinter:
         # row: ground truth classes, col: error_type
         cm = np.zeros((class_count, error_type_count), dtype=np.int32)
         for error_label in self.class_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_pred_category_id())
+            category_id = self.index_category_id_relations.get(
+                error_label.get_pred_category_id(), -1
+            )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.location_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_pred_category_id())
+            category_id = self.index_category_id_relations.get(
+                error_label.get_pred_category_id(), -1
+            )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.duplicate_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_pred_category_id())
+            category_id = self.index_category_id_relations.get(
+                error_label.get_pred_category_id(), -1
+            )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.background_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_pred_category_id())
+            category_id = self.index_category_id_relations.get(
+                error_label.get_pred_category_id(), -1
+            )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.miss_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_max_match_category_id())
+            category_id = self.index_category_id_relations.get(
+                error_label.get_max_match_category_id(), -1
+            )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.both_error_labels:
-            category_id = self.index_category_id_relations.get(error_label.get_pred_category_id())
+            category_id = self.index_category_id_relations.get(
+                error_label.get_pred_category_id(), -1
+            )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
 
@@ -109,7 +125,8 @@ class ImagePrinter:
                 ["label/error"] + [error_type for error_type in Const.MAIN_ERRORS],
             ]
             + [
-                [category_name] + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
+                [category_name]
+                + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
                 for category_id, category_name in self.categories.items()
             ],
             title=f"{self.model_name} error type matrix",
@@ -118,7 +135,7 @@ class ImagePrinter:
 
         if normalize:
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
-        category_names = [category_name for category_id, category_name in self.categories.items()]
+        category_names = [category_name for category, category_name in self.categories.items()]
         cm = pd.DataFrame(data=confusion_matrix, index=category_names, columns=Const.MAIN_ERRORS)
         cm.index.name = "Label"
 
