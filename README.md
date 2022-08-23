@@ -8,7 +8,9 @@ We hope it could be beneficial for you to figure out what kind of detection erro
 
 ## Installation
 ```shell
-    pip install git+https://github.com/FastAccounting/nobunaga
+    git clone https://github.com/FastAccounting/nobunaga
+    cd nobunaga
+    pip install -e .
 ```
 
 ### Analize error
