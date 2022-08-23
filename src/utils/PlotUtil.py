@@ -1,6 +1,8 @@
 from collections import OrderedDict
+from typing import List
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 from pandas import DataFrame
 
@@ -82,3 +84,30 @@ class PlotUtil:
         sns.despine(left=True, bottom=True, right=True)
         plt.savefig(bar_path, bbox_inches="tight", dpi=low_dpi)
         plt.close()
+
+    @staticmethod
+    def plot_matrix(
+        confusion_matrix: List[list],
+        rows: list,
+        columns: list,
+        x_title: str,
+        y_title: str,
+        output_file_path: str,
+    ):
+        cm = pd.DataFrame(data=confusion_matrix, index=rows, columns=columns)
+        sns.set(font_scale=0.4)
+        fig, axes = plt.subplots(figsize=(10, 8))
+        sns.heatmap(
+            cm,
+            square=True,
+            cbar=True,
+            annot=False,
+            cmap="Blues",
+            xticklabels=True,
+            yticklabels=True,
+            linewidths=0.5,
+        )
+        plt.xlabel(x_title, fontsize=13)
+        plt.ylabel(y_title, fontsize=13)
+        fig.subplots_adjust(bottom=0.15)
+        plt.savefig(output_file_path)

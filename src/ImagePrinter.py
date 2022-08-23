@@ -41,8 +41,12 @@ class ImagePrinter:
         cm = np.zeros((class_count, class_count), dtype=np.int32)
         for class_error in self.class_error_labels:
             try:
-                gt_category_id = class_error.get_max_match_category_id()
-                pred_category_id = class_error.get_pred_category_id()
+                gt_category_id = self.index_category_id_relations.get(
+                    class_error.get_max_unmatch_category_id(), -1
+                )
+                pred_category_id = self.index_category_id_relations.get(
+                    class_error.get_pred_category_id(), -1
+                )
                 cm[pred_category_id][gt_category_id] += 1
             except:
                 pass
@@ -66,25 +70,12 @@ class ImagePrinter:
         if normalize:
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
         category_names = [category_name for category, category_name in self.categories.items()]
-        cm = pd.DataFrame(data=confusion_matrix, index=category_names, columns=category_names)
-        sns.set(font_scale=0.4)
-        fig, axes = plt.subplots(figsize=(10, 8))
-        sns.heatmap(
-            cm,
-            square=True,
-            cbar=True,
-            annot=False,
-            cmap="Blues",
-            xticklabels=True,
-            yticklabels=True,
-            linewidths=0.5,
+        output_file_path = str(self.out_dir / f"{self.model_name}_class_error_confusion_matrix.png")
+        PlotUtil.plot_matrix(
+            confusion_matrix, category_names, category_names, "Pred", "Gt", output_file_path
         )
-        plt.xlabel("Predict", fontsize=13)
-        plt.ylabel("GT", fontsize=13)
-        fig.subplots_adjust(bottom=0.15)
-        plt.savefig(str(self.out_dir / f"{self.model_name}_class_error_confusion_matrix.png"))
 
-    def output_error_type_detail(self, normalize: bool, mode: list=['confusion_matrix', 'strip']):
+    def output_error_type_detail(self, normalize: bool, mode: list = ["confusion_matrix", "strip"]):
         confusion_matrix = {}
         class_count = len(self.categories)
         error_type_count = len(Const.MAIN_ERRORS)
@@ -92,25 +83,25 @@ class ImagePrinter:
         cm = np.zeros((class_count, error_type_count), dtype=np.int32)
         for error_label in self.class_error_labels:
             category_id = self.index_category_id_relations.get(
-                error_label.get_max_match_category_id(), -1
+                error_label.get_pred_category_id(), -1
             )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.location_error_labels:
             category_id = self.index_category_id_relations.get(
-                error_label.get_max_match_category_id(), -1
+                error_label.get_pred_category_id(), -1
             )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.duplicate_error_labels:
             category_id = self.index_category_id_relations.get(
-                error_label.get_max_match_category_id(), -1
+                error_label.get_pred_category_id(), -1
             )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
         for error_label in self.background_error_labels:
             category_id = self.index_category_id_relations.get(
-                error_label.get_max_match_category_id(), -1
+                error_label.get_pred_category_id(), -1
             )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
@@ -122,7 +113,7 @@ class ImagePrinter:
             cm[category_id][error_type_id] += 1
         for error_label in self.both_error_labels:
             category_id = self.index_category_id_relations.get(
-                error_label.get_max_match_category_id(), -1
+                error_label.get_pred_category_id(), -1
             )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
@@ -147,27 +138,22 @@ class ImagePrinter:
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
         category_names = [category_name for category, category_name in self.categories.items()]
         cm = pd.DataFrame(data=confusion_matrix, index=category_names, columns=Const.MAIN_ERRORS)
-        cm.index.name = 'Label'
+        cm.index.name = "Label"
 
-        if 'confusion_matrix' in mode:
-            sns.set(font_scale=0.4)
-            fig, axes = plt.subplots(figsize=(10, 8))
-            sns.heatmap(
-                cm,
-                square=True,
-                cbar=True,
-                annot=False,
-                cmap="Blues",
-                xticklabels=True,
-                yticklabels=True,
-                linewidths=0.5,
+        if "confusion_matrix" in mode:
+            output_file_path = str(
+                self.out_dir / f"{self.model_name}_error_type_confusion_matrix.png"
             )
-            plt.xlabel("Error", fontsize=13)
-            plt.ylabel("Label", fontsize=13)
-            fig.subplots_adjust(bottom=0.15)
-            plt.savefig(str(self.out_dir /f"{self.model_name}_error_type_confusion_matrix.png"))
+            PlotUtil.plot_matrix(
+                confusion_matrix,
+                category_names,
+                Const.MAIN_ERRORS,
+                "Label",
+                "Error",
+                output_file_path,
+            )
 
-        if 'strip' in mode:
+        if "strip" in mode:
             grid_cm = cm.reset_index()
             maximum_dap = math.ceil(cm[Const.MAIN_ERRORS].max().max())
             sns.set(font_scale=0.4)
@@ -198,7 +184,6 @@ class ImagePrinter:
             sns.despine(left=True, bottom=True)
             plt.subplots_adjust(left=0.12, top=0.98)
             plt.savefig(str(self.out_dir / f"{self.model_name}_error_type_strip.png"))
-
 
     def output_error_files(self, image_dir: str, error_type: str):
         image_dir = Path(image_dir)
