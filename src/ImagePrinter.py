@@ -56,10 +56,11 @@ class ImagePrinter:
         Util.print_table(
             [
                 ["pred/gt"]
-                + [category_name for category, category_name in self.categories.items()],
+                + [category_name for category_id, category_name in self.categories.items()],
             ]
             + [
-                [category_name] + [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
+                [category_name] +
+                [str(cnt) for cnt in cm[self.index_category_id_relations.get(category_id)]]
                 for category_id, category_name in self.categories.items()
             ],
             title=f"{self.model_name} confusion matrix",
@@ -68,7 +69,7 @@ class ImagePrinter:
 
         if normalize:
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
-        category_names = [category_name for category_id, category_name in self.categories.items()]
+        category_names = [category_name for category, category_name in self.categories.items()]
         output_file_path = str(self.out_dir / f"{self.model_name}_class_error_confusion_matrix.png")
         PlotUtil.plot_matrix(
             confusion_matrix, category_names, category_names, "Pred", "Gt", output_file_path
