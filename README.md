@@ -19,8 +19,7 @@ you need to prepare ground truth formated in [COCO object dtection](https://coco
 
 Command line is as follows:
 ```bash
-  python3 show_coco_errors.py \
-    --pred coco_instances_results.json \
+  nobunaga --pred coco_instances_results.json \
     --gt instances_val.json \
     --image_dir path/to/image_dir \
     --iou_threshold 0.5 \
