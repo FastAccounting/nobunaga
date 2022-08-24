@@ -1,7 +1,6 @@
 import argparse
 
 import nobunaga.constants as Const
-#from nobunaga import Evaluator, GtJson, ImagePrinter, PredJson
 from .evaluator import Evaluator
 from .gt_json import GtJson
 from .image_printer import ImagePrinter
