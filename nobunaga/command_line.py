@@ -1,10 +1,11 @@
 import argparse
 
 import nobunaga.constants as Const
-from .evaluator import Evaluator
-from .gt_json import GtJson
-from .image_printer import ImagePrinter
-from .pred_json import PredJson
+
+from nobunaga.evaluator import Evaluator
+from nobunaga.gt_json import GtJson
+from nobunaga.image_printer import ImagePrinter
+from nobunaga.pred_json import PredJson
 
 
 def arg():

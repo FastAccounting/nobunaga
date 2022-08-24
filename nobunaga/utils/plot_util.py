@@ -7,7 +7,6 @@ import seaborn as sns
 from pandas import DataFrame
 
 import nobunaga.constants as Const
-#from nobunaga.evaluator import Evaluator
 
 
 class PlotUtil:
