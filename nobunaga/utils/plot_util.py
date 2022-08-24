@@ -6,14 +6,14 @@ import pandas as pd
 import seaborn as sns
 from pandas import DataFrame
 
-import nobunaga.Constants as Const
-from nobunaga import Evaluator
+import nobunaga.constants as Const
+#from nobunaga.evaluator import Evaluator
 
 
 class PlotUtil:
     @staticmethod
     def plot_pie(
-        evaluation: Evaluator,
+        evaluation: "nobunaga.evaluator.Evaluator",
         colors_main: OrderedDict,
         pie_path: str,
         high_dpi: int,

@@ -4,12 +4,16 @@ __author__ = "Fast Accounting co.,ltd"
 __url__ = "https://github.com/FastAccounting/nobunaga"
 
 
-from .Constants import *
-from .Evaluator import *
-from .GtJson import *
-from .Image import *
-from .ImagePrinter import *
-from .Label import *
-from .PredJson import *
+from nobunaga import constants
+from nobunaga import gt_json
+from nobunaga import gt_label
+from nobunaga import pred_json
+from nobunaga import pred_label
+from nobunaga import label
+from nobunaga import utils
+from nobunaga import nobunaga_image
+from nobunaga import evaluator
+from nobunaga import image_printer
+
 
 __all__ = list(globals().keys())

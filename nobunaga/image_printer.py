@@ -11,8 +11,8 @@ import seaborn as sns
 from matplotlib.ticker import MultipleLocator
 from tqdm import tqdm
 
-import nobunaga.Constants as Const
-from nobunaga import Evaluator
+import nobunaga.constants as Const
+from nobunaga.evaluator import Evaluator
 from nobunaga.utils import PlotUtil, Util
 
 

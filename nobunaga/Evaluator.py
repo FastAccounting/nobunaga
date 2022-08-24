@@ -1,6 +1,6 @@
-from .GtJson import *
-from .Image import *
-from .PredJson import *
+from .gt_json import GtJson
+from .nobunaga_image import Image
+from .pred_json import PredJson
 
 
 class Evaluator:

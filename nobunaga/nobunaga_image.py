@@ -1,6 +1,10 @@
-from nobunaga.utils.Util import *
+import numpy as np
 
-from .Label import *
+from nobunaga.utils import Util
+import nobunaga.constants as Const
+from nobunaga.label import Label
+from nobunaga.pred_label import PredLabel
+from nobunaga.gt_label import GtLabel
 
 
 class Image:

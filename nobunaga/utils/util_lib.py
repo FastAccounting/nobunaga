@@ -3,6 +3,7 @@ import platform
 
 import numpy as np
 import PIL
+from PIL import ImageDraw, ImageFont
 
 
 class Util:
@@ -170,7 +171,7 @@ class Util:
                     fill=fill,
                 )
 
-        pred_draw = PIL.ImageDraw.Draw(pred_image)
+        pred_draw = ImageDraw.Draw(pred_image)
         pred_draw.text((pred_image.width / 2, 10), "Pred", font=font, fill="#000000")
 
         gt_image = PIL.Image.open(image_path)
@@ -204,7 +205,7 @@ class Util:
                     fill=fill,
                 )
 
-        gt_draw = PIL.ImageDraw.Draw(gt_image)
+        gt_draw = ImageDraw.Draw(gt_image)
         gt_draw.text((gt_image.width / 2, 10), "GT", font=font, fill="#000000")
 
         dst = PIL.Image.new("RGB", (pred_image.width + gt_image.width, pred_image.height))
@@ -218,7 +219,7 @@ class Util:
         font_path = "/Library/Fonts/Arial Unicode.ttf"
         if platform.system() == "Linux":
             font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
-        font = PIL.ImageFont.truetype(font_path, text_size)
+        font = ImageFont.truetype(font_path, text_size)
         return font
 
 
@@ -236,7 +237,7 @@ def _draw_single_box(
     fill=False,
 ):
 
-    draw = PIL.ImageDraw.Draw(image, mode="RGBA")
+    draw = ImageDraw.Draw(image, mode="RGBA")
     left, right, top, bottom = xmin, xmax, ymin, ymax
     alpha_color = color + (int(255 * alpha),)
     draw.rectangle(
