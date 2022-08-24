@@ -2,7 +2,8 @@ import os
 import platform
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+import PIL
+from PIL import ImageDraw, ImageFont
 
 
 class Util:
@@ -133,7 +134,7 @@ class Util:
     def write_label(
         image_path: str, new_file_path: str, pred_bboxes: list, gt_bboxes: list, is_mac: bool
     ):
-        pred_image = Image.open(image_path)
+        pred_image = PIL.Image.open(image_path)
         if pred_image.mode != "RGB":
             pred_image = pred_image.convert("RGB")
         score_format = ": {:.1f}"
@@ -173,7 +174,7 @@ class Util:
         pred_draw = ImageDraw.Draw(pred_image)
         pred_draw.text((pred_image.width / 2, 10), "Pred", font=font, fill="#000000")
 
-        gt_image = Image.open(image_path)
+        gt_image = PIL.Image.open(image_path)
         if gt_image.mode != "RGB":
             gt_image = gt_image.convert("RGB")
 
@@ -207,7 +208,7 @@ class Util:
         gt_draw = ImageDraw.Draw(gt_image)
         gt_draw.text((gt_image.width / 2, 10), "GT", font=font, fill="#000000")
 
-        dst = Image.new("RGB", (pred_image.width + gt_image.width, pred_image.height))
+        dst = PIL.Image.new("RGB", (pred_image.width + gt_image.width, pred_image.height))
         dst.paste(pred_image, (0, 0))
         dst.paste(gt_image, (pred_image.width, 0))
         dst.save(new_file_path)
