@@ -2,7 +2,7 @@ import os
 import platform
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+import PIL
 
 
 class Util:
@@ -133,7 +133,7 @@ class Util:
     def write_label(
         image_path: str, new_file_path: str, pred_bboxes: list, gt_bboxes: list, is_mac: bool
     ):
-        pred_image = Image.open(image_path)
+        pred_image = PIL.Image.open(image_path)
         if pred_image.mode != "RGB":
             pred_image = pred_image.convert("RGB")
         score_format = ": {:.1f}"
@@ -170,10 +170,10 @@ class Util:
                     fill=fill,
                 )
 
-        pred_draw = ImageDraw.Draw(pred_image)
+        pred_draw = PIL.ImageDraw.Draw(pred_image)
         pred_draw.text((pred_image.width / 2, 10), "Pred", font=font, fill="#000000")
 
-        gt_image = Image.open(image_path)
+        gt_image = PIL.Image.open(image_path)
         if gt_image.mode != "RGB":
             gt_image = gt_image.convert("RGB")
 
@@ -204,10 +204,10 @@ class Util:
                     fill=fill,
                 )
 
-        gt_draw = ImageDraw.Draw(gt_image)
+        gt_draw = PIL.ImageDraw.Draw(gt_image)
         gt_draw.text((gt_image.width / 2, 10), "GT", font=font, fill="#000000")
 
-        dst = Image.new("RGB", (pred_image.width + gt_image.width, pred_image.height))
+        dst = PIL.Image.new("RGB", (pred_image.width + gt_image.width, pred_image.height))
         dst.paste(pred_image, (0, 0))
         dst.paste(gt_image, (pred_image.width, 0))
         dst.save(new_file_path)
@@ -218,7 +218,7 @@ class Util:
         font_path = "/Library/Fonts/Arial Unicode.ttf"
         if platform.system() == "Linux":
             font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
-        font = ImageFont.truetype(font_path, text_size)
+        font = PIL.ImageFont.truetype(font_path, text_size)
         return font
 
 
@@ -236,7 +236,7 @@ def _draw_single_box(
     fill=False,
 ):
 
-    draw = ImageDraw.Draw(image, mode="RGBA")
+    draw = PIL.ImageDraw.Draw(image, mode="RGBA")
     left, right, top, bottom = xmin, xmax, ymin, ymax
     alpha_color = color + (int(255 * alpha),)
     draw.rectangle(
