@@ -1,5 +1,5 @@
 from nobunaga.io import GtJson, PredJson
-from nobunaga.nobunaga_image import Image
+from nobunaga.labels import Image
 
 
 class Evaluator(object):
