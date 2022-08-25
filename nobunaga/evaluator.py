@@ -1,6 +1,5 @@
-from .gt_json import GtJson
-from .nobunaga_image import Image
-from .pred_json import PredJson
+from nobunaga.nobunaga_image import Image
+from nobunaga.io import PredJson, GtJson
 
 
 class Evaluator(object):
