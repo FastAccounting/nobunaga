@@ -1,9 +1,8 @@
-from .gt_json import GtJson
-from .nobunaga_image import Image
-from .pred_json import PredJson
+from nobunaga.io import GtJson, PredJson
+from nobunaga.labels import Image
 
 
-class Evaluator:
+class Evaluator(object):
     def __init__(
         self, gt: GtJson, pred: PredJson, iou_threshold: float, confidence_threshold: float
     ):

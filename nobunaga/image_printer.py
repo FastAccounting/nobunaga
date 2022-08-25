@@ -13,7 +13,8 @@ from tqdm import tqdm
 
 import nobunaga.constants as Const
 from nobunaga.evaluator import Evaluator
-from nobunaga.utils import PlotUtil, Util
+from nobunaga.io import (plot_bar, plot_matrix, plot_pie, print_table,
+                         write_label)
 
 
 class ImagePrinter(object):
@@ -54,7 +55,7 @@ class ImagePrinter(object):
 
         # output to terminal
         confusion_matrix[self.model_name] = cm
-        Util.print_table(
+        print_table(
             [
                 ["pred/gt"]
                 + [category_name for category_id, category_name in self.categories.items()],
@@ -72,7 +73,7 @@ class ImagePrinter(object):
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
         category_names = [category_name for category, category_name in self.categories.items()]
         output_file_path = str(self.out_dir / f"{self.model_name}_class_error_confusion_matrix.png")
-        PlotUtil.plot_matrix(
+        plot_matrix(
             confusion_matrix, category_names, category_names, "Pred", "Gt", output_file_path
         )
 
@@ -122,7 +123,7 @@ class ImagePrinter(object):
         # output to terminal
         confusion_matrix[self.model_name] = cm
 
-        Util.print_table(
+        print_table(
             [
                 ["label/error"] + [error_type for error_type in Const.MAIN_ERRORS],
             ]
@@ -145,7 +146,7 @@ class ImagePrinter(object):
             output_file_path = str(
                 self.out_dir / f"{self.model_name}_error_type_confusion_matrix.png"
             )
-            PlotUtil.plot_matrix(
+            plot_matrix(
                 confusion_matrix,
                 category_names,
                 Const.MAIN_ERRORS,
@@ -244,7 +245,7 @@ class ImagePrinter(object):
                 output_dir
                 / f"{image_name_path.stem}_{error_label.get_error_type()}_{str(index_dict.get(image_name, 1))}{image_name_path.suffix}"
             )
-            Util.write_label(
+            write_label(
                 str(self.image_dir / image_name), new_file_path, pred_bboxes, gt_bboxes, True
             )
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
@@ -308,11 +309,11 @@ class ImagePrinter(object):
         pie_path = str(
             tmp_dir / "{}_{}_main_error_pie.png".format(self.model_name, Const.MODE_BBOX)
         )
-        PlotUtil.plot_pie(self.evaluation, colors_main, pie_path, high_dpi, low_dpi, 36, image_size)
+        plot_pie(self.evaluation, colors_main, pie_path, high_dpi, low_dpi, 36, image_size)
         main_bar_path = str(
             tmp_dir / "{}_{}_main_error_bar.png".format(self.model_name, Const.MODE_BBOX)
         )
-        PlotUtil.plot_bar(
+        plot_bar(
             False,
             main_errors,
             colors_main,
@@ -327,7 +328,7 @@ class ImagePrinter(object):
         special_bar_path = str(
             tmp_dir / "{}_{}_special_error_bar.png".format(self.model_name, Const.MODE_BBOX)
         )
-        PlotUtil.plot_bar(
+        plot_bar(
             True,
             special_errors,
             colors_special,

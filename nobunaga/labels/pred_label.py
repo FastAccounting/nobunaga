@@ -1,4 +1,4 @@
-class PredLabel:
+class PredLabel(object):
     def __init__(
         self,
         image_id: int,
