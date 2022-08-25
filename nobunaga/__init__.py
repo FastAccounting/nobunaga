@@ -4,7 +4,7 @@ __author__ = "Fast Accounting co.,ltd"
 __url__ = "https://github.com/FastAccounting/nobunaga"
 
 
-from nobunaga import (constants, evaluator, io, image_printer, labels,
+from nobunaga import (constants, evaluator, image_printer, io, labels,
                       nobunaga_image, utils)
 
 __all__ = list(globals().keys())

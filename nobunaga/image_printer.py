@@ -13,8 +13,8 @@ from tqdm import tqdm
 
 import nobunaga.constants as Const
 from nobunaga.evaluator import Evaluator
-from nobunaga.utils import (plot_bar, plot_matrix, plot_pie, print_table,
-                            write_label)
+from nobunaga.io import (plot_bar, plot_matrix, plot_pie, print_table,
+                         write_label)
 
 
 class ImagePrinter(object):

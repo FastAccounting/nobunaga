@@ -1,4 +1,3 @@
-from .plot_util import plot_bar, plot_matrix, plot_pie
-from .util_lib import calculate_iou, calculate_ious, print_table, write_label
+from .compute_iou import calculate_iou, calculate_ious
 
 __all__ = list(globals().keys())
