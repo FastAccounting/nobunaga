@@ -36,7 +36,6 @@ def main():
     printer.output_error_type_detail(args.normalize, mode=["confusion_matrix", "strip"])
     printer.output_confusion_matrix(args.normalize)
     for error_type in Const.MAIN_ERRORS:
-        #printer.output_error_files(args.image_dir, error_type)
         printer.output_error_files(error_type)
 
 
