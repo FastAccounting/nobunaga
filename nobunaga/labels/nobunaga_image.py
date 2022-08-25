@@ -107,10 +107,10 @@ class Image(object):
             )
 
         # miss error label
-        transpose_class_match_matrix = self.iou.T * self.class_matching.T
+        transpose_class_match_matrix = class_match_matrix.T
         for transpose_pred_index, gt in enumerate(transpose_class_match_matrix):
             iou = transpose_class_match_matrix[transpose_pred_index][np.argmax(gt, 0)]
-            if iou < self.iou_threshold * self.confidence_threshold:
+            if iou < Const.THRESHOLD_MIN_DETECTED:
                 # record miss category to Label class, it is illegal usage
                 gt_category_id = self.gt_category_column_relations.get(transpose_pred_index, -1)
                 gt_label = GtLabel(
