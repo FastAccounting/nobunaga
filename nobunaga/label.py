@@ -1,5 +1,5 @@
 import nobunaga.constants as Const
-from nobunaga.utils import Util
+from nobunaga.utils import calculate_iou
 
 from .gt_label import GtLabel
 from .pred_label import PredLabel
@@ -58,12 +58,12 @@ class Label:
     def get_max_match_iou(self):
         if not self.pred_label or not self.gt_match_label:
             return 0
-        return Util.calculate_iou(self.gt_match_label.get_bbox(), self.pred_label.get_bbox())
+        return calculate_iou(self.gt_match_label.get_bbox(), self.pred_label.get_bbox())
 
     def get_max_unmatch_iou(self):
         if not self.pred_label or not self.gt_unmatch_label:
             return 0
-        return Util.calculate_iou(self.gt_unmatch_label.get_bbox(), self.pred_label.get_bbox())
+        return calculate_iou(self.gt_unmatch_label.get_bbox(), self.pred_label.get_bbox())
 
     def is_background_error(self):
         return (

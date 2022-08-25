@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 import nobunaga.constants as Const
 from nobunaga.evaluator import Evaluator
-from nobunaga.utils import PlotUtil, Util
+from nobunaga.utils import PlotUtil, print_table, write_label
 
 
 class ImagePrinter(object):
@@ -54,7 +54,7 @@ class ImagePrinter(object):
 
         # output to terminal
         confusion_matrix[self.model_name] = cm
-        Util.print_table(
+        print_table(
             [
                 ["pred/gt"]
                 + [category_name for category_id, category_name in self.categories.items()],
@@ -122,7 +122,7 @@ class ImagePrinter(object):
         # output to terminal
         confusion_matrix[self.model_name] = cm
 
-        Util.print_table(
+        print_table(
             [
                 ["label/error"] + [error_type for error_type in Const.MAIN_ERRORS],
             ]
@@ -244,7 +244,7 @@ class ImagePrinter(object):
                 output_dir
                 / f"{image_name_path.stem}_{error_label.get_error_type()}_{str(index_dict.get(image_name, 1))}{image_name_path.suffix}"
             )
-            Util.write_label(
+            write_label(
                 str(self.image_dir / image_name), new_file_path, pred_bboxes, gt_bboxes, True
             )
             index_dict[image_name] = index_dict.get(image_name, 1) + 1

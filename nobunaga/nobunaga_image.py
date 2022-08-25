@@ -4,7 +4,7 @@ import nobunaga.constants as Const
 from nobunaga.gt_label import GtLabel
 from nobunaga.label import Label
 from nobunaga.pred_label import PredLabel
-from nobunaga.utils import Util
+from nobunaga.utils import calculate_ious
 
 
 class Image:
@@ -37,7 +37,7 @@ class Image:
         # row: predict, col: gt
         gt_bboxes = [gt[Const.MODE_BBOX] for gt in self.gts]
         pred_bboxes = [pred[Const.MODE_BBOX] for pred in self.preds]
-        self.iou = Util.calculate_ious(gt_bboxes, pred_bboxes)
+        self.iou = calculate_ious(gt_bboxes, pred_bboxes)
 
         self.confidence_matrix = np.array(
             [[pred.get("score") > self.confidence_threshold] * len(self.gts) for pred in self.preds]
