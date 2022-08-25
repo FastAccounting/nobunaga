@@ -103,32 +103,6 @@ class Util:
         iou = 0.0 if union <= 0 else float(intersection / union)
         return iou
 
-    @staticmethod
-    def get_file_name(file_path):
-        try:
-            return (
-                os.path.splitext(os.path.basename(file_path))[0]
-                + os.path.splitext(os.path.basename(file_path))[1]
-            )
-        except Exception as e:
-            print(e)
-            return ""
-
-    @staticmethod
-    def get_file_name_only(file_path):
-        try:
-            return os.path.splitext(os.path.basename(file_path))[0]
-        except Exception as e:
-            print(e)
-            return ""
-
-    @staticmethod
-    def get_directory(file_path):
-        try:
-            return os.path.dirname(file_path)
-        except Exception as e:
-            print(e)
-            return ""
 
     @staticmethod
     def write_label(
@@ -248,7 +222,6 @@ def _draw_single_box(
     )
 
     if display_str:
-        # Reverse list and print from bottom to top.
         text_width, text_height = font.getsize(display_str)
         margin = np.ceil(0.05 * text_height)
 
