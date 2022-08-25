@@ -1,7 +1,7 @@
 import json
 
 
-class GtJson:
+class GtJson(object):
     def __init__(self, file_path: str):
         with open(file_path, "r") as json_file:
             cocojson = json.load(json_file)

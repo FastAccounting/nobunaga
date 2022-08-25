@@ -7,7 +7,7 @@ from nobunaga.pred_label import PredLabel
 from nobunaga.utils import calculate_ious
 
 
-class Image:
+class Image(object):
     def __init__(
         self,
         image: dict,

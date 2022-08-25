@@ -5,7 +5,7 @@ from .gt_label import GtLabel
 from .pred_label import PredLabel
 
 
-class Label:
+class Label(object):
     def __init__(
         self,
         image_id: int,
