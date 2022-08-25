@@ -16,11 +16,12 @@ from nobunaga.evaluator import Evaluator
 from nobunaga.utils import PlotUtil, Util
 
 
-class ImagePrinter:
-    def __init__(self, model_name: str, categories: dict, evaluation: Evaluator):
+class ImagePrinter(object):
+    def __init__(self, model_name: str, categories: dict, evaluation: Evaluator, image_dir: str):
         self.model_name = model_name
         self.categories = categories
         self.evaluation = evaluation
+        self.image_dir = Path(image_dir)
         self.class_error_labels = evaluation.get_class_errors()
         self.location_error_labels = evaluation.get_location_errors()
         self.background_error_labels = evaluation.get_background_errors()
@@ -185,8 +186,7 @@ class ImagePrinter:
             plt.subplots_adjust(left=0.12, top=0.98)
             plt.savefig(str(self.out_dir / f"{self.model_name}_error_type_strip.png"))
 
-    def output_error_files(self, image_dir: str, error_type: str):
-        image_dir = Path(image_dir)
+    def output_error_files(self, error_type: str):
         output_dir = Path(f"./{self.model_name}_error")
         output_dir.mkdir(exist_ok=True)
 
@@ -245,7 +245,7 @@ class ImagePrinter:
                 / f"{image_name_path.stem}_{error_label.get_error_type()}_{str(index_dict.get(image_name, 1))}{image_name_path.suffix}"
             )
             Util.write_label(
-                str(image_dir / image_name), new_file_path, pred_bboxes, gt_bboxes, True
+                str(self.image_dir / image_name), new_file_path, pred_bboxes, gt_bboxes, True
             )
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
 
