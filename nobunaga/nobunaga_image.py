@@ -1,9 +1,7 @@
 import numpy as np
 
 import nobunaga.constants as Const
-from nobunaga.gt_label import GtLabel
-from nobunaga.label import Label
-from nobunaga.pred_label import PredLabel
+from nobunaga.labels import GtLabel, Label, PredLabel
 from nobunaga.utils import calculate_ious
 
 
