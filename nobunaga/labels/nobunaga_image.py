@@ -34,11 +34,12 @@ class Image(object):
 
         # row: predict, col: gt
         gt_bboxes = [gt[Const.MODE_BBOX] for gt in self._gts]
+        gt_error_types = [None for gt in self._gts]
         pred_bboxes = [pred[Const.MODE_BBOX] for pred in self._preds]
         self._iou = calculate_ious(gt_bboxes, pred_bboxes)
 
         self._confidence_matrix = np.array(
-            [[pred.get("score") > self._confidence_threshold] * len(self._gts) for pred in self._preds]
+            [[pred.get("score") >= self._confidence_threshold] * len(self._gts) for pred in self._preds]
         )
 
         # matrix has true when pred class and ground truth equals
@@ -54,16 +55,16 @@ class Image(object):
             return
         class_match_matrix = self._iou * self._confidence_matrix * self._class_matching
         class_unmatch_matrix = self._iou * self._confidence_matrix * ~self._class_matching
-        for gt_index, match_row in enumerate(class_match_matrix):
+        for pred_row_index, match_row in enumerate(class_match_matrix):
 
             # pred label
-            pred_category_id = self._pred_category_row_relations.get(gt_index, -1)
-            pred_bbox = pred_bboxes[gt_index]
-            pred_confidence = self._preds[gt_index].get("score", -1)
+            pred_category_id = self._pred_category_row_relations.get(pred_row_index, -1)
+            pred_bbox = pred_bboxes[pred_row_index]
+            pred_confidence = self._preds[pred_row_index].get("score", -1)
             pred_label = PredLabel(
                 self.get_image_id(),
                 self.get_image_name(),
-                gt_index,
+                pred_row_index,
                 pred_category_id,
                 pred_bbox,
                 pred_confidence,
@@ -82,7 +83,7 @@ class Image(object):
             )
 
             # unmatch gt label
-            unmatch_row = class_unmatch_matrix[gt_index]
+            unmatch_row = class_unmatch_matrix[pred_row_index]
             max_unmatch_gt_index = np.argmax(unmatch_row)
             unmatch_category_id = self._gt_category_column_relations.get(max_unmatch_gt_index, -1)
             unmatch_bbox = gt_bboxes[max_unmatch_gt_index]
@@ -94,8 +95,7 @@ class Image(object):
                 unmatch_bbox,
             )
 
-            self._labels.append(
-                Label(
+            label = Label(
                     self.get_image_id(),
                     self.get_image_name(),
                     pred_label,
@@ -104,77 +104,77 @@ class Image(object):
                     self._iou_threshold,
                     self._confidence_threshold,
                 )
-            )
 
-        # miss error label
-        transpose_class_match_matrix = class_match_matrix.T
-        for transpose_pred_index, gt in enumerate(transpose_class_match_matrix):
-            iou = transpose_class_match_matrix[transpose_pred_index][np.argmax(gt, 0)]
-            if 0 < iou < Const.THRESHOLD_MIN_DETECTED:
-                # record miss category to Label class, it is illegal usage
-                gt_category_id = self._gt_category_column_relations.get(transpose_pred_index, -1)
-                gt_label = GtLabel(
+            if gt_error_types[max_match_gt_index] is None:
+                gt_error_types[max_match_gt_index] = label.get_error_type()
+                self._labels.append(label)
+            else:
+                is_duplicate_error = False
+                for exist_label in self._labels:
+                    # duplicate error(more than 2 pred detect same gt)
+                    if exist_label.get_gt_match_label().get_index() == label.get_gt_match_label().get_index() \
+                            and label.get_max_match_iou() >= self._iou_threshold \
+                            and label.get_max_match_iou() > label.get_max_unmatch_iou() \
+                            and exist_label.get_max_match_iou() >= self._iou_threshold \
+                            and exist_label.get_max_match_iou() > exist_label.get_max_unmatch_iou():
+                        exist_label.add_duplicate_pred_labels(label.get_pred_label())
+                        gt_error_types[max_match_gt_index] = Const.ERROR_TYPE_DUPLICATE
+                        is_duplicate_error = True
+                        break
+                if not is_duplicate_error:
+                    gt_error_types[max_match_gt_index] = label.get_error_type()
+                    self._labels.append(label)
+
+        # background error label (detected but no gt exists.)
+        iou_matrix = self._iou * self._confidence_matrix
+        for pred_index, iou in enumerate(iou_matrix):
+            if iou[np.argmax(iou)] == 0 and self._preds[pred_index].get("score", -1) > self._confidence_threshold:
+                pred_category_id = self._pred_category_row_relations.get(pred_index, -1)
+                pred_bbox = pred_bboxes[pred_index]
+                pred_confidence = self._preds[pred_index].get("score", -1)
+                pred_label = PredLabel(
                     self.get_image_id(),
                     self.get_image_name(),
-                    transpose_pred_index,
-                    gt_category_id,
-                    gt_bboxes[transpose_pred_index],
+                    pred_index,
+                    pred_category_id,
+                    pred_bbox,
+                    pred_confidence,
                 )
-                self._labels.append(
-                    Label(
-                        self.get_image_id(),
-                        self.get_image_name(),
-                        None,
-                        gt_label,
-                        None,
-                        self._iou_threshold,
-                        self._confidence_threshold,
-                    )
+                label = Label(
+                    self.get_image_id(),
+                    self.get_image_name(),
+                    pred_label,
+                    None,
+                    None,
+                    self._iou_threshold,
+                    self._confidence_threshold,
                 )
+                self._labels.append(label)
 
-        # duplicate error label
-        for transpose_gt_index, class_match_row in enumerate(transpose_class_match_matrix):
-            duplicates = []
-            for transpose_pred_index, class_match_iou in enumerate(class_match_row):
-                if class_match_iou > self._iou_threshold:
-                    duplicates.append(transpose_pred_index)
-            if len(duplicates) > 1:
-                for transpose_pred_index in duplicates:
-                    # prediction
-                    pred_category_id = self._pred_category_row_relations.get(
-                        transpose_pred_index, -1
-                    )
-                    pred_confidence = self._preds[transpose_pred_index].get("score", -1)
-                    pred_label = PredLabel(
-                        self.get_image_id(),
-                        self.get_image_name(),
-                        transpose_pred_index,
-                        pred_category_id,
-                        pred_bboxes[transpose_pred_index],
-                        pred_confidence,
-                    )
-                    # ground truth
-                    match_category_id = self._gt_category_column_relations.get(
-                        transpose_gt_index, -1
-                    )
-                    gt_label = GtLabel(
-                        self.get_image_id(),
-                        self.get_image_name(),
-                        transpose_gt_index,
-                        match_category_id,
-                        gt_bboxes[transpose_gt_index],
-                    )
-                    self._labels.append(
-                        Label(
-                            self.get_image_id(),
-                            self.get_image_name(),
-                            pred_label,
-                            gt_label,
-                            None,
-                            self._iou_threshold,
-                            self._confidence_threshold,
-                        )
-                    )
+        for gt_index, gt_error_type in enumerate(gt_error_types):
+            if gt_error_type is not None:
+                continue
+            gt_category_id = self._gt_category_column_relations.get(gt_index, -1)
+            gt_label = GtLabel(
+                self.get_image_id(),
+                self.get_image_name(),
+                gt_index,
+                gt_category_id,
+                gt_bboxes[gt_index],
+            )
+
+            label = Label(
+                self.get_image_id(),
+                self.get_image_name(),
+                None,
+                gt_label,
+                None,
+                self._iou_threshold,
+                self._confidence_threshold,
+            )
+            if gt_error_types[gt_index] is None:
+                self._labels.append(label)
+                gt_error_types[gt_index] = label.get_error_type()
 
     def get_image_id(self):
         return self._image.get("id", -1)
