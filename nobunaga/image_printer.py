@@ -274,7 +274,7 @@ class ImagePrinter(object):
         colors_special = OrderedDict(
             {
                 Const.ERROR_FALSE_POSITIVE: current_palette[0],
-                Const.ERROR_TRUE_POSITIVE: current_palette[1],
+                Const.ERROR_FALSE_NEGATIVE: current_palette[1],
             }
         )
         main_max_scale = max(self._evaluation.get_main_error_distribution())

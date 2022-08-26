@@ -219,10 +219,10 @@ class Image(object):
         labels = [label for label in self._labels if label.get_error_type() == ""]
         return labels
 
-    def get_false_positive_count(self):
+    def get_false_negative_count(self):
         count = 0
         for predicted_label in self._labels:
-            if predicted_label.is_false_positive():
+            if predicted_label.is_false_negative():
                 count += 1
         return count
 
@@ -230,6 +230,13 @@ class Image(object):
         count = 0
         for predicted_label in self._labels:
             if predicted_label.is_true_positive():
+                count += 1
+        return count
+
+    def get_false_positive_count(self):
+        count = 0
+        for predicted_label in self._labels:
+            if predicted_label.is_false_positive():
                 count += 1
         return count
 

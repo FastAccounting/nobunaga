@@ -62,11 +62,11 @@ class Evaluator(object):
         return error_distribution
 
     def get_special_error_distribution(self):
-        true_positive = self.get_true_positive_count()
         false_positive = self.get_false_positive_count()
+        false_negative = self.get_false_negative_count()
         error_rate = [
-            true_positive,
             false_positive,
+            false_negative,
         ]
         return error_rate
 
@@ -81,6 +81,12 @@ class Evaluator(object):
         for image in self._images:
             true_positive_count = true_positive_count + image.get_true_positive_count()
         return true_positive_count
+
+    def get_false_negative_count(self):
+        false_negative_count = 0
+        for image in self._images:
+            false_negative_count = false_negative_count + image.get_false_negative_count()
+        return false_negative_count
 
     def get_class_errors(self):
         error_labels = []

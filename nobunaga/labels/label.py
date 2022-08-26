@@ -116,10 +116,22 @@ class Label(object):
         )
 
     def is_true_positive(self):
-        return self.get_max_match_iou() > self._iou_threshold and self.get_max_match_iou() > self.get_max_unmatch_iou()
+        return (
+                self.get_max_match_iou() > self._iou_threshold
+                and self.get_max_match_iou() > self.get_max_unmatch_iou()
+        )
 
     def is_false_positive(self):
-        return self.get_max_unmatch_iou() > self._iou_threshold and self.get_max_unmatch_iou() > self.get_max_match_iou()
+        return (
+                self.is_background_error()
+                or self.is_class_error()
+                or self.is_both_error()
+                or self.is_location_error()
+                or self.is_duplicate_error()
+        )
+
+    def is_false_negative(self):
+        return self.is_miss_error()
 
     def get_error_type(self):
         if self.is_class_error():
