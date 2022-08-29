@@ -15,7 +15,7 @@ We hope it could be beneficial for you to figure out what kind of detection erro
 
 ### Analize error
 Before analyzing detection error, 
-you need to prepare ground truth formated in [COCO object dtection](https://cocodataset.org/#home) and its corresponding prediction results in JSON and image dataset.
+you need to prepare ground truth formated in [COCO object detection](https://cocodataset.org/#home) and its corresponding prediction results in JSON and image dataset.
 
 Command line is as follows:
 ```bash
@@ -66,3 +66,30 @@ The second image is an example of a Miss error, indicating that a detection erro
 
 ![Background detection error example](examples/000000001532_Bkg_1.jpg)
 ![Miss detection error example](examples/000000001584_Miss_3.jpg)
+
+### Explanation of each Errors
+
+#### Classification Error (Cls)
+localized correctly but classified incorrectly.
+max(IoU) ≥ tf for GT of the incorrect class.
+
+#### Location Error (Loc)
+Detected by small bounding box below iou threshold.
+classified correctly but localized incorrectly.
+tb ≤ max(IoU) ≤ tf for GT of the correct class 
+
+#### Both Error (Both)
+Classified incorrectly and localized incorrectly.
+tb ≤ max(IoU) ≤ tf for GT of the incorrect class
+
+#### Duplicate Error (Dupe)
+Would be correct if not for a higher scoring detection.
+max(IoU) ≥ tf for GT of the correct class but another higher-scoring detection already matched that GT
+
+#### Background Error (Bkg)
+Detected background as foreground. 
+max(IoU) ≤ tb for all GT. 
+
+#### Miss Error (Miss)
+All undetected ground truth (false negatives) not already covered by classification or localization error.
+In nobunaga, "not already covered by all other error" define as Miss Error, and more label tend to be explained as Miss Error more than other error.
