@@ -215,18 +215,29 @@ class ImagePrinter(object):
                 gt_label = error_label.get_gt_unmatch_label()
             elif error_type == Const.ERROR_TYPE_BACKGROUND:
                 gt_label = None
+            elif error_type == Const.ERROR_TYPE_DUPLICATE:
+                pred_labels = error_label.get_duplicate_pred_labels()
+                pred_labels.append(error_label.get_pred_label())
+                pred_label = pred_labels
             image_name = error_label.get_image_name()
 
             pred_bboxes = []
-            if not pred_label:
+            if type(pred_label) == list:
+                for pred in pred_label:
+                    pred_category_name = self._categories.get(pred.get_category_id())
+                    pred_bbox = pred.get_bbox()
+                    pred_confidence = float("{:.2f}".format(pred.get_confidence() * 100))
+                    pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
+            elif not pred_label:
                 pred_category_name = ""
                 pred_bbox = [0, 0, 0, 0]
                 pred_confidence = 0
+                pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
             else:
                 pred_category_name = self._categories.get(pred_label.get_category_id())
                 pred_bbox = pred_label.get_bbox()
                 pred_confidence = float("{:.2f}".format(pred_label.get_confidence() * 100))
-            pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
+                pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
 
             gt_bboxes = []
             if not gt_label:
