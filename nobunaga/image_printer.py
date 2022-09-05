@@ -190,6 +190,7 @@ class ImagePrinter(object):
         output_dir = Path(f"./{self._model_name}_error")
         output_dir.mkdir(exist_ok=True)
 
+        # get all error labels
         error_labels = []
         if error_type == Const.ERROR_TYPE_CLASS:
             error_labels = self._class_error_labels
@@ -204,9 +205,10 @@ class ImagePrinter(object):
         elif error_type == Const.ERROR_TYPE_BOTH:
             error_labels = self._both_error_labels
 
-        # class error
         index_dict = {}
         for error_label in tqdm(error_labels, error_type + " error"):
+
+            # get pred, gt label per error.
             pred_label = error_label.get_pred_label()
             if error_type == Const.ERROR_TYPE_MISS:
                 pred_label = None
@@ -221,6 +223,7 @@ class ImagePrinter(object):
                 pred_label = pred_labels
             image_name = error_label.get_image_name()
 
+            # get pred bboxes of error label.
             pred_bboxes = []
             if type(pred_label) == list:
                 for pred in pred_label:
@@ -239,6 +242,7 @@ class ImagePrinter(object):
                 pred_confidence = float("{:.2f}".format(pred_label.get_confidence() * 100))
                 pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
 
+            # get gt bboxes of error label.
             gt_bboxes = []
             if not gt_label:
                 gt_category_name = ""
@@ -251,12 +255,41 @@ class ImagePrinter(object):
             gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
             image_name_path = Path(image_name)
 
+            # get all detection and gt of this image.
+            image = self._evaluation.get_image_by_image_id(error_label.get_image_id())
+            all_pred_bboxes = []
+            all_gt_bboxes = []
+            for all_label in image.get_labels():
+                if all_label.get_pred_label() is not None:
+                    pred_category_name = self._categories.get(
+                        all_label.get_pred_label().get_category_id()
+                    )
+                    pred_bbox = all_label.get_pred_label().get_bbox()
+                    pred_confidence = float(
+                        "{:.2f}".format(all_label.get_pred_label().get_confidence() * 100)
+                    )
+                    all_pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
+
+                if all_label.get_gt_match_label() is not None:
+                    gt_category_name = self._categories.get(
+                        all_label.get_gt_match_label().get_category_id()
+                    )
+                    gt_bbox = all_label.get_gt_match_label().get_bbox()
+                    gt_confidence = float(1.0)
+                    all_gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
+
+            bboxes = {
+                "pred": pred_bboxes,
+                "gt": gt_bboxes,
+                "all pred": all_pred_bboxes,
+                "all gt": all_gt_bboxes,
+            }
             new_file_path = str(
                 output_dir
                 / f"{image_name_path.stem}_{error_label.get_error_type()}_{str(index_dict.get(image_name, 1))}{image_name_path.suffix}"
             )
             write_label(
-                str(self._image_dir / image_name), new_file_path, pred_bboxes, gt_bboxes, True
+                str(self._image_dir / image_name), new_file_path, bboxes, 2
             )
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
 

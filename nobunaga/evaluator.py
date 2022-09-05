@@ -25,6 +25,12 @@ class Evaluator(object):
     def get_images(self):
         return self._images
 
+    def get_image_by_image_id(self, image_id: int):
+        for image in self._images:
+            if image.get_image_id() == image_id:
+                return image
+        return None
+
     def get_all_labels(self):
         labels = []
         for image in self._images:
