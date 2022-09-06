@@ -260,22 +260,26 @@ class ImagePrinter(object):
             all_pred_bboxes = []
             all_gt_bboxes = []
             for all_label in image.get_labels():
-                if all_label.get_pred_label() is not None:
+                # pred label
+                all_pred_label = all_label.get_pred_label()
+                if all_pred_label is not None and all_pred_label.get_confidence() > self._evaluation.get_confidence_threshold():
                     pred_category_name = self._categories.get(
-                        all_label.get_pred_label().get_category_id()
+                        all_pred_label.get_category_id()
                     )
-                    pred_bbox = all_label.get_pred_label().get_bbox()
+                    pred_bbox = all_pred_label.get_bbox()
                     pred_confidence = float(
-                        "{:.2f}".format(all_label.get_pred_label().get_confidence() * 100)
+                        "{:.2f}".format(all_pred_label.get_confidence() * 100)
                     )
                     all_pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
 
-                if all_label.get_gt_match_label() is not None:
+                # gt label
+                all_gt_label = all_label.get_gt_match_label()
+                if all_gt_label is not None:
                     gt_category_name = self._categories.get(
-                        all_label.get_gt_match_label().get_category_id()
+                        all_gt_label.get_category_id()
                     )
-                    gt_bbox = all_label.get_gt_match_label().get_bbox()
-                    gt_confidence = float(1.0)
+                    gt_bbox = all_gt_label.get_bbox()
+                    gt_confidence = ""
                     all_gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
 
             bboxes = {
