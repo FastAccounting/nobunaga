@@ -1,91 +1,77 @@
 import platform
 
+import math
 import numpy as np
 import PIL
 from PIL import ImageDraw, ImageFont
 
 
 def write_label(
-    image_path: str, new_file_path: str, pred_bboxes: list, gt_bboxes: list, is_mac: bool
+        image_path: str,
+        new_file_path: str,
+        bboxes: dict,
+        col_size: int
 ):
-    pred_image = PIL.Image.open(image_path)
-    if pred_image.mode != "RGB":
-        pred_image = pred_image.convert("RGB")
-    score_format = ": {:.1f}"
-    width = 2
-    alpha = 0.5
-    text_size = 16
-    fill = False
-    font = get_font(text_size)
 
-    if len(pred_bboxes) > 0:
-        for bbox in pred_bboxes:
-            name = bbox[0]
-            pred_left = bbox[1]
-            pred_width = bbox[3]
-            pred_right = pred_left + pred_width
-            pred_top = bbox[2]
-            pred_height = bbox[4]
-            pred_bottom = pred_top + pred_height
-            score = bbox[5]
-            color = (0, 255, 0)
-            display_str = name + score_format.format(score)
+    images = []
+    image_height = 0
+    image_width = 0
+    for title, bbox_list in bboxes.items():
+        image = PIL.Image.open(image_path)
+        if image.mode != "RGB":
+            image = image.convert("RGB")
 
-            pred_image = _draw_single_box(
-                image=pred_image,
-                xmin=pred_left,
-                ymin=pred_top,
-                xmax=pred_right,
-                ymax=pred_bottom,
-                color=color,
-                display_str=display_str,
-                font=font,
-                width=width,
-                alpha=alpha,
-                fill=fill,
-            )
+        score_format = ": {:.1f}"
+        text_size = 16
+        font = get_font(text_size)
 
-    pred_draw = ImageDraw.Draw(pred_image)
-    pred_draw.text((pred_image.width / 2, 10), "Pred", font=font, fill="#000000")
+        if len(bbox_list) > 0:
+            for bbox in bbox_list:
+                name = bbox[0]
+                left = bbox[1]
+                width = bbox[3]
+                right = left + width
+                top = bbox[2]
+                height = bbox[4]
+                bottom = top + height
+                score = bbox[5]
+                color = (0, 255, 0)
+                if len(str(score)) > 0:
+                    display_str = name + score_format.format(score)
+                else:
+                    display_str = name
+                image = _draw_single_box(
+                    image=image,
+                    xmin=int(left),
+                    ymin=int(top),
+                    xmax=int(right),
+                    ymax=int(bottom),
+                    color=color,
+                    display_str=display_str,
+                    font=font,
+                    width=2,
+                    alpha=0.5,
+                    fill=False,
+                )
 
-    gt_image = PIL.Image.open(image_path)
-    if gt_image.mode != "RGB":
-        gt_image = gt_image.convert("RGB")
+        draw = ImageDraw.Draw(image)
+        draw.text((image.width / 2, 10), title, font=font, fill="#000000")
+        image_height = image.height
+        image_width = image.width
+        images.append(image)
 
-    if len(gt_bboxes) > 0:
-        for bbox in gt_bboxes:
-            name = bbox[0]
-            gt_left = bbox[1]
-            gt_width = bbox[3]
-            gt_right = gt_left + gt_width
-            gt_top = bbox[2]
-            gt_height = bbox[4]
-            gt_bottom = gt_top + gt_height
-            score = bbox[5]
-            color = (0, 255, 0)
-            display_str = name
-
-            gt_image = _draw_single_box(
-                image=gt_image,
-                xmin=gt_left,
-                ymin=gt_top,
-                xmax=gt_right,
-                ymax=gt_bottom,
-                color=color,
-                display_str=display_str,
-                font=font,
-                width=width,
-                alpha=alpha,
-                fill=fill,
-            )
-
-    gt_draw = ImageDraw.Draw(gt_image)
-    gt_draw.text((gt_image.width / 2, 10), "GT", font=font, fill="#000000")
-
-    dst = PIL.Image.new("RGB", (pred_image.width + gt_image.width, pred_image.height))
-    dst.paste(pred_image, (0, 0))
-    dst.paste(gt_image, (pred_image.width, 0))
-    dst.save(new_file_path)
+    row_count = math.ceil(len(bboxes) / col_size)
+    merged_image = PIL.Image.new("RGB", (image_width * col_size, image_height * row_count))
+    col_index = 0
+    row_index = 0
+    for image in images:
+        merged_image.paste(image, (image_width * col_index, image_height * row_index))
+        if col_index >= col_size - 1:
+            col_index = 0
+            row_index += 1
+        else:
+            col_index += 1
+    merged_image.save(new_file_path)
     return new_file_path
 
 

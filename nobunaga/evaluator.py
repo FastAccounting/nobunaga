@@ -9,6 +9,8 @@ class Evaluator(object):
         self._gt = gt
         self._pred = pred
         self._images = []
+        self._iou_threshold = iou_threshold
+        self._confidence_threshold = confidence_threshold
         for image_id, gt_annotation in self._gt.get_annotations().items():
             image = self._gt.get_image_by_image_id(image_id)
             pred_annotation = self._pred.get_annotation_by_image_id(image_id)
@@ -24,6 +26,12 @@ class Evaluator(object):
 
     def get_images(self):
         return self._images
+
+    def get_image_by_image_id(self, image_id: int):
+        for image in self._images:
+            if image.get_image_id() == image_id:
+                return image
+        return None
 
     def get_all_labels(self):
         labels = []
@@ -43,6 +51,15 @@ class Evaluator(object):
 
     def get_pred(self):
         return self._pred
+
+    def get_confidence_threshold(self):
+        return self._confidence_threshold
+
+    def get_iou_threshold(self):
+        return self._iou_threshold
+
+    def get_confidence_threshold(self):
+        return self._confidence_threshold
 
     def get_main_error_distribution(self):
         class_error = len(self.get_class_errors())
