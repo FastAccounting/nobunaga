@@ -74,8 +74,8 @@ localized correctly but classified incorrectly.
 max(IoU) ≥ tf for GT of the incorrect class.
 
 #### Location Error (Loc)
-Detected by small bounding box below iou threshold.
-classified correctly but localized incorrectly.
+Detected by small bounding box below IoU threshold.
+Classified correctly but localized incorrectly.
 tb ≤ max(IoU) ≤ tf for GT of the correct class 
 
 #### Both Error (Both)
@@ -83,7 +83,7 @@ Classified incorrectly and localized incorrectly.
 tb ≤ max(IoU) ≤ tf for GT of the incorrect class
 
 #### Duplicate Error (Dupe)
-Would be correct if not for a higher scoring detection.
+It would be correct if not for a higher scoring detection.
 max(IoU) ≥ tf for GT of the correct class but another higher-scoring detection already matched that GT
 
 #### Background Error (Bkg)
@@ -91,5 +91,5 @@ Detected background as foreground.
 max(IoU) ≤ tb for all GT. 
 
 #### Miss Error (Miss)
-All undetected ground truth (false negatives) not already covered by classification or localization error.
-In nobunaga, "not already covered by all other error" define as Miss Error, and more label tend to be explained as Miss Error more than other error.
+All undetected ground truths (false negatives) are not already covered by classification or localization error.
+In Nobunaga, "not already covered by all other errors" define as Miss Error, and more labels tend to be explained as Miss Error more than other errors.
