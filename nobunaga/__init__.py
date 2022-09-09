@@ -1,6 +1,6 @@
-__copyright__ = "Copyright (C) 2022 Fast Accounting Co., Ltd."
+__copyright__ = "Copyright (C) 2022 FUJITAKE Masat and Fast Accounting Co., Ltd."
 __version__ = "v0.0.0"
-__author__ = "Fast Accounting co.,ltd"
+__author__ = "FUJITAKE Masato and Fast Accounting Co., Ltd."
 __url__ = "https://github.com/FastAccounting/nobunaga"
 
 
