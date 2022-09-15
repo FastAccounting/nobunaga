@@ -17,7 +17,7 @@ or
     cd nobunaga
     pip install -e .
 ```
-or 
+
 
 ### Analize error
 Before analyzing detection error, 
