@@ -8,10 +8,16 @@ We hope it could be beneficial for you to figure out what kind of detection erro
 
 ## Installation
 ```shell
+    pip install nobunaga
+```
+
+or 
+```shell
     git clone https://github.com/FastAccounting/nobunaga
     cd nobunaga
     pip install -e .
 ```
+or 
 
 ### Analize error
 Before analyzing detection error, 
