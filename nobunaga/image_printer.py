@@ -32,7 +32,7 @@ class ImagePrinter(object):
         for index, category_id in enumerate(self._categories.keys()):
             self._index_category_id_relations[category_id] = index
 
-        self._out_dir = Path("./_result")
+        self._out_dir = Path(f"./_{self._model_name}_result")
         self._out_dir.mkdir(exist_ok=True)
 
     def output_confusion_matrix(self, normalize: bool):
@@ -187,8 +187,6 @@ class ImagePrinter(object):
             plt.savefig(str(self._out_dir / f"{self._model_name}_error_type_strip.png"))
 
     def output_error_files(self, error_type: str):
-        output_dir = Path(f"./{self._model_name}_error")
-        output_dir.mkdir(exist_ok=True)
 
         # get all error labels
         error_labels = []
@@ -288,9 +286,22 @@ class ImagePrinter(object):
                 "all pred": all_pred_bboxes,
                 "all gt": all_gt_bboxes,
             }
+
+            # create output directory
+            error_type = error_label.get_error_type()
+            if error_type in [Const.ERROR_TYPE_CLASS, Const.ERROR_TYPE_BOTH]:
+                category_name = self._categories.get(error_label.get_gt_unmatch_label().get_category_id())
+            elif error_type in [Const.ERROR_TYPE_LOCATION, Const.ERROR_TYPE_MISS, Const.ERROR_TYPE_DUPLICATE]:
+                category_name = self._categories.get(error_label.get_gt_match_label().get_category_id())
+            else:
+                category_name = self._categories.get(error_label.get_pred_category_id())
+
+            output_dir = Path(f"./_{self._model_name}_error/{error_type}/{category_name}")
+            output_dir.mkdir(exist_ok=True, parents=True)
+
             new_file_path = str(
                 output_dir
-                / f"{image_name_path.stem}_{error_label.get_error_type()}_{str(index_dict.get(image_name, 1))}{image_name_path.suffix}"
+                / f"{image_name_path.stem}_{str(index_dict.get(image_name, 1))}{image_name_path.suffix}"
             )
             write_label(
                 str(self._image_dir / image_name), new_file_path, bboxes, 2
