@@ -12,8 +12,7 @@ from tqdm import tqdm
 
 import nobunaga.constants as Const
 from nobunaga.evaluator import Evaluator
-from nobunaga.io import (plot_bar, plot_matrix, plot_pie, print_table,
-                         write_label)
+from nobunaga.io import plot_bar, plot_matrix, plot_pie, print_table, write_label
 
 
 class ImagePrinter(object):
@@ -71,7 +70,9 @@ class ImagePrinter(object):
         if normalize:
             confusion_matrix = confusion_matrix / confusion_matrix.astype(np.float).sum(axis=0)
         category_names = [category_name for category, category_name in self._categories.items()]
-        output_file_path = str(self._out_dir / f"{self._model_name}_class_error_confusion_matrix.png")
+        output_file_path = str(
+            self._out_dir / f"{self._model_name}_class_error_confusion_matrix.png"
+        )
         plot_matrix(
             confusion_matrix, category_names, category_names, "Pred", "Gt", output_file_path
         )
@@ -260,22 +261,20 @@ class ImagePrinter(object):
             for all_label in image.get_labels():
                 # pred label
                 all_pred_label = all_label.get_pred_label()
-                if all_pred_label is not None and all_pred_label.get_confidence() > self._evaluation.get_confidence_threshold():
-                    pred_category_name = self._categories.get(
-                        all_pred_label.get_category_id()
-                    )
+                if (
+                    all_pred_label is not None
+                    and all_pred_label.get_confidence()
+                    > self._evaluation.get_confidence_threshold()
+                ):
+                    pred_category_name = self._categories.get(all_pred_label.get_category_id())
                     pred_bbox = all_pred_label.get_bbox()
-                    pred_confidence = float(
-                        "{:.2f}".format(all_pred_label.get_confidence() * 100)
-                    )
+                    pred_confidence = float("{:.2f}".format(all_pred_label.get_confidence() * 100))
                     all_pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
 
                 # gt label
                 all_gt_label = all_label.get_gt_match_label()
                 if all_gt_label is not None:
-                    gt_category_name = self._categories.get(
-                        all_gt_label.get_category_id()
-                    )
+                    gt_category_name = self._categories.get(all_gt_label.get_category_id())
                     gt_bbox = all_gt_label.get_bbox()
                     gt_confidence = ""
                     all_gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
@@ -290,9 +289,17 @@ class ImagePrinter(object):
             # create output directory
             error_type = error_label.get_error_type()
             if error_type in [Const.ERROR_TYPE_CLASS, Const.ERROR_TYPE_BOTH]:
-                category_name = self._categories.get(error_label.get_gt_unmatch_label().get_category_id())
-            elif error_type in [Const.ERROR_TYPE_LOCATION, Const.ERROR_TYPE_MISS, Const.ERROR_TYPE_DUPLICATE]:
-                category_name = self._categories.get(error_label.get_gt_match_label().get_category_id())
+                category_name = self._categories.get(
+                    error_label.get_gt_unmatch_label().get_category_id()
+                )
+            elif error_type in [
+                Const.ERROR_TYPE_LOCATION,
+                Const.ERROR_TYPE_MISS,
+                Const.ERROR_TYPE_DUPLICATE,
+            ]:
+                category_name = self._categories.get(
+                    error_label.get_gt_match_label().get_category_id()
+                )
             else:
                 category_name = self._categories.get(error_label.get_pred_category_id())
 
@@ -303,9 +310,7 @@ class ImagePrinter(object):
                 output_dir
                 / f"{image_name_path.stem}_{str(index_dict.get(image_name, 1))}{image_name_path.suffix}"
             )
-            write_label(
-                str(self._image_dir / image_name), new_file_path, bboxes, 2
-            )
+            write_label(str(self._image_dir / image_name), new_file_path, bboxes, 2)
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
 
     def output_error_summary(self):
