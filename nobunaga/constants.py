@@ -17,6 +17,9 @@ MAIN_ERRORS = [
     ERROR_TYPE_MISS,
 ]
 
+# name
+OPTIMAL_CORRECTION_COST = "optimal_correction_cost"
+
 # special error type
 ERROR_FALSE_POSITIVE = "FP"
 ERROR_FALSE_NEGATIVE = "FN"

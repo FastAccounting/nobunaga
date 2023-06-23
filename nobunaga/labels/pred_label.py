@@ -8,7 +8,6 @@ class PredLabel(object):
         bbox: list,
         confidence: float,
     ):
-
         self._image_id = image_id
         self._image_name = image_name
         self._index = index

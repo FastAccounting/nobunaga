@@ -1,3 +1,5 @@
+import math
+
 import nobunaga.constants as Const
 from nobunaga.utils import calculate_iou
 
@@ -11,18 +13,17 @@ class Label(object):
         image_id: int,
         image_name: str,
         pred_label: PredLabel,
-        gt_match_label: GtLabel,
-        gt_unmatch_label: GtLabel,
+        match_gt_category_label: GtLabel,
+        unmatch_gt_category_label: GtLabel,
         iou_threshold: float,
         confidence_threshold: float,
     ):
-
         self._image_id = image_id
         self._image_name = image_name
         self._pred_label = pred_label
         self._duplicate_pred_labels = []
-        self._gt_match_label = gt_match_label
-        self._gt_unmatch_label = gt_unmatch_label
+        self._match_gt_category_label = match_gt_category_label
+        self._unmatch_gt_category_label = unmatch_gt_category_label
         self._iou_threshold = iou_threshold
         self._confidence_threshold = confidence_threshold
 
@@ -42,73 +43,79 @@ class Label(object):
         return self._duplicate_pred_labels
 
     def get_gt_match_label(self):
-        return self._gt_match_label
+        return self._match_gt_category_label
 
     def get_gt_unmatch_label(self):
-        return self._gt_unmatch_label
+        return self._unmatch_gt_category_label
 
     def get_pred_category_id(self):
         if not self._pred_label:
             return -1
         return self._pred_label.get_category_id()
 
-    def get_max_match_category_id(self):
-        if not self._gt_match_label:
+    def get_max_match_gt_category_id(self):
+        if not self._match_gt_category_label:
             return -1
-        return self._gt_match_label.get_category_id()
+        return self._match_gt_category_label.get_category_id()
 
-    def get_max_unmatch_category_id(self):
-        if not self._gt_unmatch_label:
+    def get_max_unmatch_gt_category_id(self):
+        if not self._unmatch_gt_category_label:
             return -1
-        return self._gt_unmatch_label.get_category_id()
+        return self._unmatch_gt_category_label.get_category_id()
 
-    def get_max_match_iou(self):
-        if not self._pred_label or not self._gt_match_label:
+    def get_max_match_gt_category_iou(self):
+        if not self._pred_label or not self._match_gt_category_label:
             return 0
-        return calculate_iou(self._gt_match_label.get_bbox(), self._pred_label.get_bbox())
+        return calculate_iou(self._match_gt_category_label.get_bbox(), self._pred_label.get_bbox())
 
-    def get_max_unmatch_iou(self):
-        if not self._pred_label or not self._gt_unmatch_label:
+    def get_max_unmatch_gt_category_iou(self):
+        if not self._pred_label or not self._unmatch_gt_category_label:
             return 0
-        return calculate_iou(self._gt_unmatch_label.get_bbox(), self._pred_label.get_bbox())
+        return calculate_iou(
+            self._unmatch_gt_category_label.get_bbox(), self._pred_label.get_bbox()
+        )
 
     def is_background_error(self):
         return (
-                0
-                <= self.get_max_unmatch_iou()
-                < self.get_max_match_iou()
-                < Const.THRESHOLD_MIN_DETECTED
+            0
+            <= self.get_max_unmatch_gt_category_iou()
+            < self.get_max_match_gt_category_iou()
+            < Const.THRESHOLD_MIN_DETECTED
         ) or (
-                self._pred_label is not None
-                and self._gt_match_label is None
-                and self._gt_unmatch_label is None
+            self._pred_label is not None
+            and self._match_gt_category_label is None
+            and self._unmatch_gt_category_label is None
         )
 
     def is_class_error(self):
         return (
-                self.get_pred_category_id() != self.get_max_unmatch_category_id()
-                and self.get_max_unmatch_iou() > self.get_max_match_iou()
-                and self.get_max_unmatch_iou() >= self._iou_threshold
+            self.get_pred_category_id() != self.get_max_unmatch_gt_category_id()
+            and self.get_max_unmatch_gt_category_iou() > self.get_max_match_gt_category_iou()
+            and self.get_max_unmatch_gt_category_iou() >= self._iou_threshold
         )
 
     def is_location_error(self):
         return (
-                self._iou_threshold > self.get_max_match_iou() > Const.THRESHOLD_MIN_DETECTED
-                and self.get_max_match_iou() > self.get_max_unmatch_iou()
+            self._iou_threshold
+            > self.get_max_match_gt_category_iou()
+            > Const.THRESHOLD_MIN_DETECTED
+            and self.get_max_match_gt_category_iou() > self.get_max_unmatch_gt_category_iou()
         )
 
     def is_both_error(self):
         return (
-                self.get_pred_category_id() != self.get_max_unmatch_category_id()
-                and self.get_max_unmatch_iou() > self.get_max_match_iou()
-                and self._iou_threshold > self.get_max_unmatch_iou() > Const.THRESHOLD_MIN_DETECTED
+            self.get_pred_category_id() != self.get_max_unmatch_gt_category_id()
+            and self.get_max_unmatch_gt_category_iou() > self.get_max_match_gt_category_iou()
+            and self._iou_threshold
+            > self.get_max_unmatch_gt_category_iou()
+            > Const.THRESHOLD_MIN_DETECTED
         )
 
     def is_miss_error(self):
         return (
-                self._pred_label is None
-                and self._gt_match_label is not None
-                and self._gt_unmatch_label is None
+            self._pred_label is None
+            and self._match_gt_category_label is not None
+            and self._unmatch_gt_category_label is None
         )
 
     def is_duplicate_error(self):
@@ -116,17 +123,17 @@ class Label(object):
 
     def is_true_positive(self):
         return (
-                self.get_max_match_iou() >= self._iou_threshold
-                and self.get_max_match_iou() > self.get_max_unmatch_iou()
+            self.get_max_match_gt_category_iou() >= self._iou_threshold
+            and self.get_max_match_gt_category_iou() > self.get_max_unmatch_gt_category_iou()
         )
 
     def is_false_positive(self):
         return (
-                self.is_background_error()
-                or self.is_class_error()
-                or self.is_both_error()
-                or self.is_location_error()
-                or self.is_duplicate_error()
+            self.is_background_error()
+            or self.is_class_error()
+            or self.is_both_error()
+            or self.is_location_error()
+            or self.is_duplicate_error()
         )
 
     def is_false_negative(self):
@@ -147,3 +154,117 @@ class Label(object):
             return Const.ERROR_TYPE_DUPLICATE
         else:
             return ""
+
+    def get_correct_distance(self):
+        """
+        [Sum of No Error, Cls, Loc, Both, Dupe, Bkg, Miss, IoU distance of most match label, Classification distance, Sum of All Errors]
+        """
+        match_distance = (
+            -math.log(self.get_max_match_gt_category_iou(), 10)
+            if self.get_max_match_gt_category_iou() > 0
+            else 0
+        )
+        unmatch_distance = 1
+        if self.is_class_error():
+            return [
+                0.0,
+                unmatch_distance,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                unmatch_distance,
+                unmatch_distance,
+            ]
+        elif self.is_location_error():
+            return [
+                0.0,
+                0.0,
+                match_distance,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                match_distance,
+                0.0,
+                match_distance
+            ]
+        elif self.is_both_error():
+            return [
+                0.0,
+                0.0,
+                0.0,
+                unmatch_distance,
+                0.0,
+                0.0,
+                0.0,
+                unmatch_distance,
+                unmatch_distance,
+                unmatch_distance,
+            ]
+        elif self.is_duplicate_error():
+            max_iou = 0.0
+            distance = 0.0
+            for duplicate_pred_label in self._duplicate_pred_labels:
+                iou = calculate_iou(
+                    self._match_gt_category_label.get_bbox(), duplicate_pred_label.get_bbox()
+                )
+                if iou >= max_iou:
+                    max_iou = iou
+                    if iou > 0.0:
+                        distance += -math.log(iou, 10)
+            return [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                distance,
+                0.0,
+                0.0,
+                match_distance,
+                0.0,
+                distance
+            ]
+        elif self.is_background_error():
+            distance = -math.log(self._iou_threshold, 10)
+            return [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                distance,
+                0.0,
+                distance,
+                0.0,
+                distance
+            ]
+        elif self.is_miss_error():
+            distance = -math.log(self._iou_threshold, 10)
+            return [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                distance,
+                distance,
+                0.0,
+                distance
+            ]
+        else:
+            return [
+                match_distance,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                match_distance,
+                0.0,
+                0.0
+            ]

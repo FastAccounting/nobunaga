@@ -1,3 +1,4 @@
+import csv
 import math
 from collections import OrderedDict
 from pathlib import Path
@@ -20,6 +21,7 @@ class ImagePrinter(object):
         self._model_name = model_name
         self._categories = categories
         self._evaluation = evaluation
+        self._images = evaluation.get_images()
         self._image_dir = Path(image_dir)
         self._class_error_labels = evaluation.get_class_errors()
         self._location_error_labels = evaluation.get_location_errors()
@@ -42,7 +44,7 @@ class ImagePrinter(object):
         for class_error in self._class_error_labels:
             try:
                 gt_category_id = self._index_category_id_relations.get(
-                    class_error.get_max_unmatch_category_id(), -1
+                    class_error.get_max_unmatch_gt_category_id(), -1
                 )
                 pred_category_id = self._index_category_id_relations.get(
                     class_error.get_pred_category_id(), -1
@@ -109,7 +111,7 @@ class ImagePrinter(object):
             cm[category_id][error_type_id] += 1
         for error_label in self._miss_error_labels:
             category_id = self._index_category_id_relations.get(
-                error_label.get_max_match_category_id(), -1
+                error_label.get_max_match_gt_category_id(), -1
             )
             error_type_id = Const.MAIN_ERRORS.index(error_label.get_error_type())
             cm[category_id][error_type_id] += 1
@@ -187,8 +189,96 @@ class ImagePrinter(object):
             plt.subplots_adjust(left=0.12, top=0.98)
             plt.savefig(str(self._out_dir / f"{self._model_name}_error_type_strip.png"))
 
-    def output_error_files(self, error_type: str):
+    def output_correction_distance_csv(self):
+        COUNT_POSTFIX = " Count"
+        COST_POSTFIX = " Cost"
+        correction_distances = [
+            [
+                "File Name",
+                Const.ERROR_TYPE_CLASS + COUNT_POSTFIX,
+                Const.ERROR_TYPE_LOCATION + COUNT_POSTFIX,
+                Const.ERROR_TYPE_BOTH + COUNT_POSTFIX,
+                Const.ERROR_TYPE_DUPLICATE + COUNT_POSTFIX,
+                Const.ERROR_TYPE_BACKGROUND + COUNT_POSTFIX,
+                Const.ERROR_TYPE_MISS + COUNT_POSTFIX,
+                "Sum of No Error" + COST_POSTFIX,
+                Const.ERROR_TYPE_CLASS + COST_POSTFIX,
+                Const.ERROR_TYPE_LOCATION + COST_POSTFIX,
+                Const.ERROR_TYPE_BOTH + COST_POSTFIX,
+                Const.ERROR_TYPE_DUPLICATE + COST_POSTFIX,
+                Const.ERROR_TYPE_BACKGROUND + COST_POSTFIX,
+                Const.ERROR_TYPE_MISS + COST_POSTFIX,
+                "Sum of Class Match" + COST_POSTFIX,
+                "Sum of Class Unmatch" + COST_POSTFIX,
+                "Total Error" + COST_POSTFIX,
+            ]
+        ]
+        for image in self._images:
+            error_count = [
+                len(image.get_class_errors()),
+                len(image.get_location_errors()),
+                len(image.get_both_errors()),
+                len(image.get_duplicate_errors()),
+                len(image.get_background_errors()),
+                len(image.get_miss_errors()),
+            ]
+            image_name = image.get_image_name()
+            correction_distance = image.get_correct_distance()
+            correction_distances.append([image_name] + error_count + correction_distance)
 
+        # output csv
+        with open(
+            str(self._out_dir / f"{self._model_name}_correction_distance.csv"), mode="w"
+        ) as f:
+            csv_writer = csv.writer(f)
+            for correction_distance in correction_distances:
+                csv_writer.writerow(correction_distance)
+
+
+    def output_correction_distance_files(self):
+        for image in tqdm(self._images, "Bad Cost Images:"):
+            correction_cost = image.get_correction_cost()
+            if correction_cost == 0.0:
+                continue
+
+            # get all detection and gt of this image.
+            all_pred_bboxes = []
+            all_gt_bboxes = []
+            for all_label in image.get_labels():
+                # pred label
+                all_pred_label = all_label.get_pred_label()
+                if (
+                    all_pred_label is not None
+                    and all_pred_label.get_confidence()
+                    > self._evaluation.get_confidence_threshold()
+                ):
+                    pred_category_name = self._categories.get(all_pred_label.get_category_id())
+                    pred_bbox = all_pred_label.get_bbox()
+                    pred_confidence = float("{:.2f}".format(all_pred_label.get_confidence() * 100))
+                    all_pred_bboxes.append([pred_category_name] + pred_bbox + [pred_confidence])
+
+                # gt label
+                all_gt_label = all_label.get_gt_match_label()
+                if all_gt_label is not None:
+                    gt_category_name = self._categories.get(all_gt_label.get_category_id())
+                    gt_bbox = all_gt_label.get_bbox()
+                    gt_confidence = ""
+                    all_gt_bboxes.append([gt_category_name] + gt_bbox + [gt_confidence])
+
+            bboxes = {
+                "all pred": all_pred_bboxes,
+                "all gt": all_gt_bboxes,
+            }
+
+            correction_cost = f"{correction_cost:.1f}"
+            output_dir = Path(str(self._out_dir / f"_error/cost{correction_cost}"))
+            output_dir.mkdir(exist_ok=True, parents=True)
+
+            new_file_path = str(output_dir / image.get_image_name())
+            write_label(str(self._image_dir / image.get_image_name()), new_file_path, bboxes, 2)
+
+
+    def output_error_files(self, error_type: str):
         # get all error labels
         error_labels = []
         if error_type == Const.ERROR_TYPE_CLASS:
@@ -206,7 +296,6 @@ class ImagePrinter(object):
 
         index_dict = {}
         for error_label in tqdm(error_labels, error_type + " error"):
-
             # get pred, gt label per error.
             pred_label = error_label.get_pred_label()
             if error_type == Const.ERROR_TYPE_MISS:
@@ -314,7 +403,6 @@ class ImagePrinter(object):
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
 
     def output_error_summary(self):
-
         mpl.rcParams["figure.dpi"] = 150
 
         # Seaborn color palette

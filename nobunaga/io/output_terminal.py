@@ -1,4 +1,3 @@
-
 def print_table(rows: list, title: str = None):
     print()
     # Get all rows to have the same number of columns
@@ -9,8 +8,7 @@ def print_table(rows: list, title: str = None):
 
     # Compute the text width of each column
     col_widths = [
-        max([len(rows[i][col_idx]) for i in range(len(rows))])
-        for col_idx in range(len(rows[0]))
+        max([len(rows[i][col_idx]) for i in range(len(rows))]) for col_idx in range(len(rows[0]))
     ]
 
     divider = "--" + ("---".join(["-" * w for w in col_widths])) + "-"

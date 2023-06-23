@@ -15,6 +15,7 @@ def arg():
     parser.add_argument("--confidence_threshold", "-c", type=float, default=0.7)
     parser.add_argument("--model_name", "-m", type=str, default="")
     parser.add_argument("--normalize", type=bool, default=False)
+    parser.add_argument("--output_image", "-o", action="store_true")
     args = parser.parse_args()
     print(args)
 
@@ -33,9 +34,14 @@ def main():
     printer = ImagePrinter(args.model_name, categories, evaluation, args.image_dir)
     printer.output_error_summary()
     printer.output_error_type_detail(args.normalize, mode=["confusion_matrix", "strip"])
+    printer.output_correction_distance_csv()
     printer.output_confusion_matrix(args.normalize)
-    for error_type in Const.MAIN_ERRORS:
-        printer.output_error_files(error_type)
+
+    # if you set argument -o you can output error images.
+    if args.output_image:
+        printer.output_correction_distance_files()
+        for error_type in Const.MAIN_ERRORS:
+            printer.output_error_files(error_type)
 
 
 if __name__ == "__main__":
