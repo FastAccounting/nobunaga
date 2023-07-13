@@ -34,7 +34,8 @@ def main():
     printer = ImagePrinter(args.model_name, categories, evaluation, args.image_dir)
     printer.output_error_summary()
     printer.output_error_type_detail(args.normalize, mode=["confusion_matrix", "strip"])
-    printer.output_correction_distance_csv()
+    printer.output_correction_distance_csv_per_file()
+    printer.output_correction_distance_csv_per_label()
     printer.output_confusion_matrix(args.normalize)
 
     # if you set argument -o you can output error images.

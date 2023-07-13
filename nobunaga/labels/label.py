@@ -78,11 +78,15 @@ class Label(object):
     def is_background_error(self):
         return (
             0
-            <= self.get_max_unmatch_gt_category_iou()
-            < self.get_max_match_gt_category_iou()
+            <= self.get_max_match_gt_category_iou()
             < Const.THRESHOLD_MIN_DETECTED
         ) or (
-            self._pred_label is not None
+            0
+            <= self.get_max_match_gt_category_iou()
+            < self.get_max_unmatch_gt_category_iou()
+            < Const.THRESHOLD_MIN_DETECTED
+        ) or (
+               self._pred_label is not None
             and self._match_gt_category_label is None
             and self._unmatch_gt_category_label is None
         )
@@ -99,23 +103,24 @@ class Label(object):
             self._iou_threshold
             > self.get_max_match_gt_category_iou()
             > Const.THRESHOLD_MIN_DETECTED
-            and self.get_max_match_gt_category_iou() > self.get_max_unmatch_gt_category_iou()
+            and self.get_max_match_gt_category_iou() >= self.get_max_unmatch_gt_category_iou()
         )
 
     def is_both_error(self):
         return (
             self.get_pred_category_id() != self.get_max_unmatch_gt_category_id()
             and self.get_max_unmatch_gt_category_iou() > self.get_max_match_gt_category_iou()
-            and self._iou_threshold
-            > self.get_max_unmatch_gt_category_iou()
-            > Const.THRESHOLD_MIN_DETECTED
+            and (
+                self._iou_threshold
+                > self.get_max_unmatch_gt_category_iou()
+                > Const.THRESHOLD_MIN_DETECTED
+            )
         )
 
     def is_miss_error(self):
         return (
             self._pred_label is None
             and self._match_gt_category_label is not None
-            and self._unmatch_gt_category_label is None
         )
 
     def is_duplicate_error(self):
@@ -140,24 +145,24 @@ class Label(object):
         return self.is_miss_error()
 
     def get_error_type(self):
-        if self.is_class_error():
-            return Const.ERROR_TYPE_CLASS
+        if self.is_miss_error():
+            return Const.ERROR_TYPE_MISS
         elif self.is_location_error():
             return Const.ERROR_TYPE_LOCATION
-        elif self.is_background_error():
-            return Const.ERROR_TYPE_BACKGROUND
-        elif self.is_both_error():
-            return Const.ERROR_TYPE_BOTH
-        elif self.is_miss_error():
-            return Const.ERROR_TYPE_MISS
         elif self.is_duplicate_error():
             return Const.ERROR_TYPE_DUPLICATE
+        elif self.is_class_error():
+            return Const.ERROR_TYPE_CLASS
+        elif self.is_both_error():
+            return Const.ERROR_TYPE_BOTH
+        elif self.is_background_error():
+            return Const.ERROR_TYPE_BACKGROUND
         else:
             return ""
 
     def get_correct_distance(self):
         """
-        [Sum of No Error, Cls, Loc, Both, Dupe, Bkg, Miss, IoU distance of most match label, Classification distance, Sum of All Errors]
+        [Cls, Loc, Both, Dupe, Bkg, Miss, No Error, All Errors]
         """
         match_distance = (
             -math.log(self.get_max_match_gt_category_iou(), 10)
@@ -167,7 +172,6 @@ class Label(object):
         unmatch_distance = 1
         if self.is_class_error():
             return [
-                0.0,
                 unmatch_distance,
                 0.0,
                 0.0,
@@ -175,19 +179,16 @@ class Label(object):
                 0.0,
                 0.0,
                 0.0,
-                unmatch_distance,
                 unmatch_distance,
             ]
         elif self.is_location_error():
             return [
                 0.0,
-                0.0,
                 match_distance,
                 0.0,
                 0.0,
                 0.0,
                 0.0,
-                match_distance,
                 0.0,
                 match_distance
             ]
@@ -195,13 +196,11 @@ class Label(object):
             return [
                 0.0,
                 0.0,
-                0.0,
                 unmatch_distance,
                 0.0,
                 0.0,
                 0.0,
-                unmatch_distance,
-                unmatch_distance,
+                0.0,
                 unmatch_distance,
             ]
         elif self.is_duplicate_error():
@@ -219,11 +218,9 @@ class Label(object):
                 0.0,
                 0.0,
                 0.0,
-                0.0,
                 distance,
                 0.0,
                 0.0,
-                match_distance,
                 0.0,
                 distance
             ]
@@ -234,10 +231,8 @@ class Label(object):
                 0.0,
                 0.0,
                 0.0,
-                0.0,
                 distance,
                 0.0,
-                distance,
                 0.0,
                 distance
             ]
@@ -249,15 +244,12 @@ class Label(object):
                 0.0,
                 0.0,
                 0.0,
-                0.0,
-                distance,
                 distance,
                 0.0,
                 distance
             ]
         else:
             return [
-                match_distance,
                 0.0,
                 0.0,
                 0.0,
@@ -265,6 +257,5 @@ class Label(object):
                 0.0,
                 0.0,
                 match_distance,
-                0.0,
                 0.0
             ]

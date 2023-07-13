@@ -35,6 +35,8 @@ class ImagePrinter(object):
 
         self._out_dir = Path(f"./_{self._model_name}_result")
         self._out_dir.mkdir(exist_ok=True)
+        self._occ_out_dir = Path(f"./_{self._model_name}_occ")
+        self._occ_out_dir.mkdir(exist_ok=True)
 
     def output_confusion_matrix(self, normalize: bool):
         confusion_matrix = {}
@@ -189,46 +191,68 @@ class ImagePrinter(object):
             plt.subplots_adjust(left=0.12, top=0.98)
             plt.savefig(str(self._out_dir / f"{self._model_name}_error_type_strip.png"))
 
-    def output_correction_distance_csv(self):
-        COUNT_POSTFIX = " Count"
+    def output_correction_distance_csv_per_label(self):
         COST_POSTFIX = " Cost"
         correction_distances = [
             [
                 "File Name",
-                Const.ERROR_TYPE_CLASS + COUNT_POSTFIX,
-                Const.ERROR_TYPE_LOCATION + COUNT_POSTFIX,
-                Const.ERROR_TYPE_BOTH + COUNT_POSTFIX,
-                Const.ERROR_TYPE_DUPLICATE + COUNT_POSTFIX,
-                Const.ERROR_TYPE_BACKGROUND + COUNT_POSTFIX,
-                Const.ERROR_TYPE_MISS + COUNT_POSTFIX,
-                "Sum of No Error" + COST_POSTFIX,
+                "Pred Label Name",
+                "Gt Label Name",
                 Const.ERROR_TYPE_CLASS + COST_POSTFIX,
                 Const.ERROR_TYPE_LOCATION + COST_POSTFIX,
                 Const.ERROR_TYPE_BOTH + COST_POSTFIX,
                 Const.ERROR_TYPE_DUPLICATE + COST_POSTFIX,
                 Const.ERROR_TYPE_BACKGROUND + COST_POSTFIX,
                 Const.ERROR_TYPE_MISS + COST_POSTFIX,
-                "Sum of Class Match" + COST_POSTFIX,
-                "Sum of Class Unmatch" + COST_POSTFIX,
+                "Total No Error" + COST_POSTFIX,
                 "Total Error" + COST_POSTFIX,
             ]
         ]
         for image in self._images:
-            error_count = [
-                len(image.get_class_errors()),
-                len(image.get_location_errors()),
-                len(image.get_both_errors()),
-                len(image.get_duplicate_errors()),
-                len(image.get_background_errors()),
-                len(image.get_miss_errors()),
-            ]
             image_name = image.get_image_name()
-            correction_distance = image.get_correct_distance()
-            correction_distances.append([image_name] + error_count + correction_distance)
+            for label in image.get_labels():
+                pred_label_name = self._categories.get(label.get_pred_label().get_category_id()) if label.get_pred_label() else '-'
+                if label.get_error_type() in [Const.ERROR_TYPE_CLASS, Const.ERROR_TYPE_BOTH]:
+                    gt_label_name = self._categories.get(label.get_gt_unmatch_label().get_category_id())
+                elif label.get_error_type() in [Const.ERROR_TYPE_BACKGROUND]:
+                    gt_label_name = '-'
+                else:
+                    gt_label_name = self._categories.get(label.get_gt_match_label().get_category_id())
+                label_names = [pred_label_name, gt_label_name]
+                correction_distance = label.get_correct_distance()
+                correction_distances.append([image_name] + label_names + correction_distance)
 
         # output csv
         with open(
-            str(self._out_dir / f"{self._model_name}_correction_distance.csv"), mode="w"
+            str(self._occ_out_dir / f"{self._model_name}_correction_distance_per_label.csv"), mode="w"
+        ) as f:
+            csv_writer = csv.writer(f)
+            for correction_distance in correction_distances:
+                csv_writer.writerow(correction_distance)
+
+    def output_correction_distance_csv_per_file(self):
+        COST_POSTFIX = " Cost"
+        correction_distances = [
+            [
+                "File Name",
+                Const.ERROR_TYPE_CLASS + COST_POSTFIX,
+                Const.ERROR_TYPE_LOCATION + COST_POSTFIX,
+                Const.ERROR_TYPE_BOTH + COST_POSTFIX,
+                Const.ERROR_TYPE_DUPLICATE + COST_POSTFIX,
+                Const.ERROR_TYPE_BACKGROUND + COST_POSTFIX,
+                Const.ERROR_TYPE_MISS + COST_POSTFIX,
+                "Total No Error" + COST_POSTFIX,
+                "Total Error" + COST_POSTFIX,
+            ]
+        ]
+        for image in self._images:
+            image_name = image.get_image_name()
+            correction_distance = image.get_correct_distance()
+            correction_distances.append([image_name] + correction_distance)
+
+        # output csv
+        with open(
+            str(self._occ_out_dir / f"{self._model_name}_correction_distance_per_file.csv"), mode="w"
         ) as f:
             csv_writer = csv.writer(f)
             for correction_distance in correction_distances:
@@ -271,7 +295,7 @@ class ImagePrinter(object):
             }
 
             correction_cost = f"{correction_cost:.1f}"
-            output_dir = Path(str(self._out_dir / f"_error/cost{correction_cost}"))
+            output_dir = Path(str(self._occ_out_dir / f"cost{correction_cost}"))
             output_dir.mkdir(exist_ok=True, parents=True)
 
             new_file_path = str(output_dir / image.get_image_name())

@@ -268,9 +268,9 @@ class Image(object):
 
     def get_correct_distance(self):
         """
-        [Sum of No Error, Cls, Loc, Both, Dupe, Bkg, Miss, IoU distance of most match label, Classification distance, Sum of All Errors]
+        [Cls, Loc, Both, Dupe, Bkg, Miss, No Error, All Errors]
         """
-        correct_distances = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        correct_distances = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         for label in self._labels:
             correct_distances = [
                 x + y for x, y in zip(correct_distances, label.get_correct_distance())
