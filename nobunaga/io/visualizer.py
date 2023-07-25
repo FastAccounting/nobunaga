@@ -1,18 +1,12 @@
+import math
 import platform
 
-import math
 import numpy as np
 import PIL
 from PIL import ImageDraw, ImageFont
 
 
-def write_label(
-        image_path: str,
-        new_file_path: str,
-        bboxes: dict,
-        col_size: int
-):
-
+def write_label(image_path: str, new_file_path: str, bboxes: dict, col_size: int):
     images = []
     image_height = 0
     image_width = 0
@@ -96,7 +90,6 @@ def _draw_single_box(
     alpha=0.5,
     fill=False,
 ):
-
     draw = ImageDraw.Draw(image, mode="RGBA")
     left, right, top, bottom = xmin, xmax, ymin, ymax
     alpha_color = color + (int(255 * alpha),)

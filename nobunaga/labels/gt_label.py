@@ -1,6 +1,5 @@
 class GtLabel(object):
     def __init__(self, image_id: int, image_name: str, index: int, category_id: int, bbox: list):
-
         self._image_id = image_id
         self._image_name = image_name
         self._index = index

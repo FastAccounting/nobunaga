@@ -38,25 +38,31 @@ class Image(object):
         pred_bboxes = [pred[Const.MODE_BBOX] for pred in self._preds]
         self._iou = calculate_ious(gt_bboxes, pred_bboxes)
 
-        self._confidence_matrix = np.array(
-            [[pred.get("score") >= self._confidence_threshold] * len(self._gts) for pred in self._preds]
+        self._is_confidencial_matrix = np.array(
+            [
+                [pred.get("score") >= self._confidence_threshold] * len(self._gts)
+                for pred in self._preds
+            ]
         )
 
         # matrix has true when pred class and ground truth equals
-        self._class_matching = [[]]
+        self._match_gt_category = [[]]
         if len(self._gts) > 0:
-            pred_classes = np.array([pred.get("category_id", "") for pred in self._preds])
-            gt_classes = np.array([gt.get("category_id", "") for gt in self._gts])
-            self._class_matching = pred_classes[:, None] == gt_classes[None, :]
+            pred_categories = np.array([pred.get("category_id", "") for pred in self._preds])
+            gt_categories = np.array([gt.get("category_id", "") for gt in self._gts])
+            self._match_gt_category = pred_categories[:, None] == gt_categories[None, :]
 
         # get all predicted label
         self._labels = []
         if len(self._iou) == 0:
             return
-        class_match_matrix = self._iou * self._confidence_matrix * self._class_matching
-        class_unmatch_matrix = self._iou * self._confidence_matrix * ~self._class_matching
-        for pred_row_index, match_row in enumerate(class_match_matrix):
-
+        match_gt_category_matrix = (
+            self._iou * self._is_confidencial_matrix * self._match_gt_category
+        )
+        unmatch_gt_category_matrix = (
+            self._iou * self._is_confidencial_matrix * ~self._match_gt_category
+        )
+        for pred_row_index, match_row in enumerate(match_gt_category_matrix):
             # pred label
             pred_category_id = self._pred_category_row_relations.get(pred_row_index, -1)
             pred_bbox = pred_bboxes[pred_row_index]
@@ -71,64 +77,76 @@ class Image(object):
             )
 
             # match gt label
-            max_match_gt_index = np.argmax(match_row)
-            match_category_id = self._gt_category_column_relations.get(max_match_gt_index, -1)
-            match_bbox = gt_bboxes[max_match_gt_index]
-            match_gt_label = GtLabel(
+            max_match_gt_category_index = np.argmax(match_row)
+            match_gt_category_id = self._gt_category_column_relations.get(
+                max_match_gt_category_index, -1
+            )
+            match_gt_category_bbox = gt_bboxes[max_match_gt_category_index]
+            match_gt_category_label = GtLabel(
                 self.get_image_id(),
                 self.get_image_name(),
-                max_match_gt_index,
-                match_category_id,
-                match_bbox,
+                max_match_gt_category_index,
+                match_gt_category_id,
+                match_gt_category_bbox,
             )
 
             # unmatch gt label
-            unmatch_row = class_unmatch_matrix[pred_row_index]
-            max_unmatch_gt_index = np.argmax(unmatch_row)
-            unmatch_category_id = self._gt_category_column_relations.get(max_unmatch_gt_index, -1)
-            unmatch_bbox = gt_bboxes[max_unmatch_gt_index]
-            unmatch_gt_label = GtLabel(
+            unmatch_gt_category_row = unmatch_gt_category_matrix[pred_row_index]
+            max_unmatch_gt_category_index = np.argmax(unmatch_gt_category_row)
+            unmatch_gt_category_id = self._gt_category_column_relations.get(
+                max_unmatch_gt_category_index, -1
+            )
+            unmatch_gt_category_bbox = gt_bboxes[max_unmatch_gt_category_index]
+            unmatch_gt_category_label = GtLabel(
                 self.get_image_id(),
                 self.get_image_name(),
-                max_unmatch_gt_index,
-                unmatch_category_id,
-                unmatch_bbox,
+                max_unmatch_gt_category_index,
+                unmatch_gt_category_id,
+                unmatch_gt_category_bbox,
             )
 
             label = Label(
-                    self.get_image_id(),
-                    self.get_image_name(),
-                    pred_label,
-                    match_gt_label,
-                    unmatch_gt_label,
-                    self._iou_threshold,
-                    self._confidence_threshold,
-                )
+                self.get_image_id(),
+                self.get_image_name(),
+                pred_label,
+                match_gt_category_label,
+                unmatch_gt_category_label,
+                self._iou_threshold,
+                self._confidence_threshold,
+            )
 
-            if gt_error_types[max_match_gt_index] is None:
-                gt_error_types[max_match_gt_index] = label.get_error_type()
+            if gt_error_types[max_match_gt_category_index] is None:
+                gt_error_types[max_match_gt_category_index] = label.get_error_type()
                 self._labels.append(label)
             else:
                 is_duplicate_error = False
                 for exist_label in self._labels:
                     # duplicate error(more than 2 pred detect same gt)
-                    if exist_label.get_gt_match_label().get_index() == label.get_gt_match_label().get_index() \
-                            and label.get_max_match_iou() >= self._iou_threshold \
-                            and label.get_max_match_iou() > label.get_max_unmatch_iou() \
-                            and exist_label.get_max_match_iou() >= self._iou_threshold \
-                            and exist_label.get_max_match_iou() > exist_label.get_max_unmatch_iou():
+                    if (
+                        exist_label.get_gt_match_label().get_index()
+                        == label.get_gt_match_label().get_index()
+                        and label.get_max_match_gt_category_iou() >= self._iou_threshold
+                        and label.get_max_match_gt_category_iou()
+                        > label.get_max_unmatch_gt_category_iou()
+                        and exist_label.get_max_match_gt_category_iou() >= self._iou_threshold
+                        and exist_label.get_max_match_gt_category_iou()
+                        > exist_label.get_max_unmatch_gt_category_iou()
+                    ):
                         exist_label.add_duplicate_pred_labels(label.get_pred_label())
-                        gt_error_types[max_match_gt_index] = Const.ERROR_TYPE_DUPLICATE
+                        gt_error_types[max_match_gt_category_index] = Const.ERROR_TYPE_DUPLICATE
                         is_duplicate_error = True
                         break
                 if not is_duplicate_error:
-                    gt_error_types[max_match_gt_index] = label.get_error_type()
+                    gt_error_types[max_match_gt_category_index] = label.get_error_type()
                     self._labels.append(label)
 
         # background error label (detected but no gt exists.)
-        iou_matrix = self._iou * self._confidence_matrix
+        iou_matrix = self._iou * self._is_confidencial_matrix
         for pred_index, iou in enumerate(iou_matrix):
-            if iou[np.argmax(iou)] == 0 and self._preds[pred_index].get("score", -1) > self._confidence_threshold:
+            if (
+                iou[np.argmax(iou)] == 0
+                and self._preds[pred_index].get("score", -1) > self._confidence_threshold
+            ):
                 pred_category_id = self._pred_category_row_relations.get(pred_index, -1)
                 pred_bbox = pred_bboxes[pred_index]
                 pred_confidence = self._preds[pred_index].get("score", -1)
@@ -247,3 +265,17 @@ class Image(object):
                 if label.is_true_positive():
                     count += 1
         return count
+
+    def get_correct_distance(self):
+        """
+        [Cls, Loc, Both, Dupe, Bkg, Miss, No Error, All Errors]
+        """
+        correct_distances = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        for label in self._labels:
+            correct_distances = [
+                x + y for x, y in zip(correct_distances, label.get_correct_distance())
+            ]
+        return correct_distances
+
+    def get_correction_cost(self):
+        return self.get_correct_distance()[-1]

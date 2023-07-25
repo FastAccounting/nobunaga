@@ -29,7 +29,8 @@ Command line is as follows:
     --gt instances_val.json \
     --image_dir path/to/image_dir \
     --iou_threshold 0.5 \
-    --confidence_threshold 0.7
+    --confidence_threshold 0.7 \
+    --output_image
 ```
 
 Then, you can get the below files
@@ -37,6 +38,7 @@ Then, you can get the below files
 - Per-label detection error
 - Class error matrix
 - Error images with ground truth label
+- Error scores of each images (Optimal Correction Cost)
 
 The definition of errors follows TIDE.
 However, we remark that Nobunaga counts the number of labels for each error, unlike TIDE.
