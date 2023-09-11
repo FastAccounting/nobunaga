@@ -4,6 +4,10 @@ Based on [TIDE](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/1234805
 Nobunaga exports the overall distribution of detection error in the given dataset as well as per-category error.
 Towards analyzing miss classification, Nobunaga plots their error in a confusion matrix.
 Moreover, it plots detection errors in images one by one with annotation.
+
+In addition, Nobunaga can calculate [Optimal Correction Cost](https://arxiv.org/abs/2203.14438) per image.
+The numeral score proposed by Otani et al. indicates how much it costs to bring a prediction closer to the corresponding ground truth.
+Nobunaga allows the users to see how wrong a detection was, image by image and label by label.
 We hope it could be beneficial for you to figure out what kind of detection error happens in your models specifically.
 
 ## Installation
