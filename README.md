@@ -37,17 +37,17 @@ Command line is as follows:
     --output_image
 ```
 
-Then, you can get the below files
+Then, you can get the below files:
 - Error summary similar to TIDE
 - Per-label detection error
 - Class error matrix
 - Error images with ground truth label
-- Error scores of each images (Optimal Correction Cost)
+- Error scores of each images based on Optimal Correction Cost (Details can be found below.)
 
 The definition of errors follows TIDE.
 However, we remark that Nobunaga counts the number of labels for each error, unlike TIDE.
-Therefore, Nobunaga displays the total number of corresponding errors that occurred in the data set. The numbers are different from those in TIDE.
-
+Therefore, Nobunaga displays the total number of corresponding errors that occurred in the data set.
+The numbers are different from those in TIDE.
 
 #### Error Summary
 The summary of errors provides an overview of errors in the dataset, similar to TIDE.
