@@ -33,5 +33,26 @@ def print_table(rows: list, title: str = None):
         )
         if row == rows[0]:
             print(divider)
+
+    print(divider)
+
+    # output sum row
+    column_sum = [0 for _ in range(len(col_widths))]
+    column_sum[0] = "Sum"
+    for row in rows[1:]:
+        for row_index, row_value in enumerate(row):
+            if row_index == 0:
+                continue
+            column_sum[row_index] = int(column_sum[row_index]) + int(row_value)
+    column_sum = [str(value) for value in column_sum]
+    print(
+        "  "
+        + "   ".join(
+            [
+                ("{:>%ds}" % col_widths[col_idx]).format(column_sum[col_idx]) for col_idx in range(len(column_sum))
+            ]
+        )
+        + "  "
+    )
     print(thick_divider)
     print()

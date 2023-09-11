@@ -98,7 +98,7 @@ def plot_matrix(
         cm,
         square=True,
         cbar=True,
-        annot=False,
+        annot=True,
         cmap="Blues",
         xticklabels=True,
         yticklabels=True,

@@ -38,7 +38,7 @@ class Image(object):
         pred_bboxes = [pred[Const.MODE_BBOX] for pred in self._preds]
         self._iou = calculate_ious(gt_bboxes, pred_bboxes)
 
-        self._is_confidencial_matrix = np.array(
+        self._is_confident_matrix = np.array(
             [
                 [pred.get("score") >= self._confidence_threshold] * len(self._gts)
                 for pred in self._preds
@@ -57,10 +57,10 @@ class Image(object):
         if len(self._iou) == 0:
             return
         match_gt_category_matrix = (
-            self._iou * self._is_confidencial_matrix * self._match_gt_category
+                self._iou * self._is_confident_matrix * self._match_gt_category
         )
         unmatch_gt_category_matrix = (
-            self._iou * self._is_confidencial_matrix * ~self._match_gt_category
+                self._iou * self._is_confident_matrix * ~self._match_gt_category
         )
         for pred_row_index, match_row in enumerate(match_gt_category_matrix):
             # pred label
@@ -141,7 +141,7 @@ class Image(object):
                     self._labels.append(label)
 
         # background error label (detected but no gt exists.)
-        iou_matrix = self._iou * self._is_confidencial_matrix
+        iou_matrix = self._iou * self._is_confident_matrix
         for pred_index, iou in enumerate(iou_matrix):
             if (
                 iou[np.argmax(iou)] == 0

@@ -78,13 +78,8 @@ class Label(object):
     def is_background_error(self):
         return (
             0
-            <= self.get_max_unmatch_gt_category_iou()
-            <= self.get_max_match_gt_category_iou()
-            < Const.THRESHOLD_MIN_DETECTED
-        ) or (
-            0
-            <= self.get_max_match_gt_category_iou()
             < self.get_max_unmatch_gt_category_iou()
+            <= self.get_max_match_gt_category_iou()
             < Const.THRESHOLD_MIN_DETECTED
         ) or (
                self._pred_label is not None
@@ -147,18 +142,16 @@ class Label(object):
         return self.is_miss_error()
 
     def get_error_type(self):
-        if self.is_class_error():
-            return Const.ERROR_TYPE_CLASS
-        elif self.is_miss_error():
-            return Const.ERROR_TYPE_MISS
-        elif self.is_location_error():
-            return Const.ERROR_TYPE_LOCATION
+        if self.is_both_error():
+            return Const.ERROR_TYPE_BOTH
         elif self.is_duplicate_error():
             return Const.ERROR_TYPE_DUPLICATE
         elif self.is_class_error():
             return Const.ERROR_TYPE_CLASS
-        elif self.is_both_error():
-            return Const.ERROR_TYPE_BOTH
+        elif self.is_location_error():
+            return Const.ERROR_TYPE_LOCATION
+        elif self.is_miss_error():
+            return Const.ERROR_TYPE_MISS
         elif self.is_background_error():
             return Const.ERROR_TYPE_BACKGROUND
         else:
