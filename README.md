@@ -5,7 +5,7 @@ Nobunaga exports the overall distribution of detection error in the given datase
 Towards analyzing miss classification, Nobunaga plots their error in a confusion matrix.
 Moreover, it plots detection errors in images one by one with annotation.
 
-In addition, Nobunaga can calculate [Optimal Correction Cost](https://arxiv.org/abs/2203.14438) per image.
+In addition, Nobunaga can calculate [Optimal Correction Cost (OCC)](https://arxiv.org/abs/2203.14438) per image.
 The numeral score proposed by Otani et al. indicates how much it costs to bring a prediction closer to the corresponding ground truth.
 Nobunaga allows the users to see how wrong a detection was, image by image and label by label.
 We hope it could be beneficial for you to figure out what kind of detection error happens in your models specifically.
@@ -42,12 +42,19 @@ Then, you can get the below files:
 - Per-label detection error
 - Class error matrix
 - Error images with ground truth label
-- Error scores of each images based on Optimal Correction Cost (Details can be found below.)
+- Error scores of each image based on OCC (Details below.)
 
 The definition of errors follows TIDE.
-However, we remark that Nobunaga counts the number of labels for each error, unlike TIDE.
-Therefore, Nobunaga displays the total number of corresponding errors that occurred in the data set.
+However, unlike TIDE, we remark that Nobunaga counts the number of labels for each error.
+Therefore, Nobunaga displays the total number of corresponding errors in the data set.
 The numbers are different from those in TIDE.
+
+Outputs related to OCC are generated under the **_occ folder** when Nobunaga is run. 
+The contents are the following three items:
+- A summary of each image about OCC in CSV.
+- Per-label OCC as summarized in a CSV file.
+- Directories of images containing the six TIDE error types were sorted into folders based on OCC score.
+
 
 #### Error Summary
 The summary of errors provides an overview of errors in the dataset, similar to TIDE.
@@ -64,7 +71,7 @@ For example, we confirm that the "Person" label has many Dupe errors, followed b
 
 #### Class error confusion matrix
 The confusion matrix visualizes what label tends to be misclassified as other labels.
-We remark that this confusion matrix visualizes only false examples, so correct ones are omitted.
+This confusion matrix visualizes only false examples, so correct ones are omitted.
 
 ![Confusion Matrix](examples/coco_result_class_error_cm.png)
 
@@ -74,19 +81,19 @@ Images containing detection errors are written to the `{model_name}_error` direc
 The pictures show one with the error on the left and another with the ground truth on the right.
 Two examples are shown here.
 The first image is an example of a Bkg error, which incorrectly detects the background area. The correct image has no annotations.
-The second image is an example of a Miss error, indicating that a detection error has been occured.
+The second image is an example of a Miss error, indicating a detection error has been occured.
 
 ![Background detection error example](examples/000000001532_Bkg_1.jpg)
 ![Miss detection error example](examples/000000001584_Miss_3.jpg)
 
-### Explanation of each Errors
+### Explanation of each Error
 
 #### Classification Error (Cls)
 localized correctly but classified incorrectly.
 max(IoU) ≥ tf for GT of the incorrect class.
 
 #### Location Error (Loc)
-Detected by small bounding box below IoU threshold.
+Detected by the small bounding box below IoU threshold.
 Classified correctly but localized incorrectly.
 tb ≤ max(IoU) ≤ tf for GT of the correct class 
 
