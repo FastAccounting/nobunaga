@@ -15,7 +15,7 @@ def arg():
     parser.add_argument("--confidence_threshold", "-c", type=float, default=0.7)
     parser.add_argument("--model_name", "-m", type=str, default="")
     parser.add_argument("--normalize", type=bool, default=False)
-    parser.add_argument("--output_image", "-o", action="store_true")
+    parser.add_argument("--output_image", "-o", default=True)
     args = parser.parse_args()
     print(args)
 

@@ -1,4 +1,5 @@
 import math
+import os
 import platform
 
 import numpy as np
@@ -70,9 +71,7 @@ def write_label(image_path: str, new_file_path: str, bboxes: dict, col_size: int
 
 
 def get_font(text_size: int):
-    font_path = "/Library/Fonts/Arial Unicode.ttf"
-    if platform.system() == "Linux":
-        font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+    font_path = "assets/font/DejaVuSansMono.ttf"
     font = ImageFont.truetype(font_path, text_size)
     return font
 
