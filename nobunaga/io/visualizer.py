@@ -71,7 +71,7 @@ def write_label(image_path: str, new_file_path: str, bboxes: dict, col_size: int
 
 
 def get_font(text_size: int):
-    font_path = "assets/font/DejaVuSansMono.ttf"
+    font_path = "assets/font/GenEiGothicP-Regular.otf"
     font = ImageFont.truetype(font_path, text_size)
     return font
 

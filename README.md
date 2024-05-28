@@ -22,6 +22,12 @@ or
     pip install -e .
 ```
 
+### Confirm Installation
+
+```shell
+    cd nobunaga
+    nobunaga
+```
 
 ### Analize error
 Before analyzing detection error, 
@@ -112,3 +118,7 @@ max(IoU) ≤ tb for all GT.
 #### Miss Error (Miss)
 All undetected ground truths (false negatives) are not already covered by classification or localization error.
 In Nobunaga, "not already covered by all other errors" define as Miss Error, and more labels tend to be explained as Miss Error more than other errors.
+
+## Copyright
+We use GenEi Gothic-Font to visualize above errors.
+![Distribution site](https://okoneya.jp/font/)
