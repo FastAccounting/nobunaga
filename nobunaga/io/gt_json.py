@@ -9,13 +9,20 @@ class GtJson(object):
         self._annotations = {}
         self._categories = {}
 
-        for image in cocojson["images"]:
+        for image in cocojson.get("images", []):
             self._images[image.get("id", -1)] = image
 
-        for annotation in cocojson["annotations"]:
-            if self._annotations.get(annotation.get("image_id", ""), "") == "":
-                self._annotations[annotation.get("image_id", "")] = []
-            self._annotations[annotation.get("image_id", "")].append(annotation)
+        for annotation in cocojson.get("annotations", []):
+            image_id = annotation.get("image_id")
+            if annotation.get("segments_info"):
+                if self._annotations.get(image_id, "") == "":
+                    self._annotations[image_id] = []
+                for anno in annotation.get("segments_info"):
+                    self._annotations[image_id].append(anno)
+            else:
+                if self._annotations.get(image_id, "") == "":
+                    self._annotations[image_id] = []
+                self._annotations[image_id].append(annotation)
 
         for category in cocojson["categories"] if "categories" in cocojson else []:
             self._categories[category.get("id", -1)] = category.get("name", "")

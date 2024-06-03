@@ -22,6 +22,8 @@ def plot_pie(
     # pie plot for error type breakdown
     error_sizes = evaluation.get_main_error_distribution()
     fig, ax = plt.subplots(1, 1, figsize=(image_size, image_size), dpi=high_dpi)
+    if error_sizes == [0, 0, 0, 0, 0, 0]:
+        error_sizes = [0.0000001, 0.0000001, 0.0000001, 0.0000001, 0.0000001, 0.0000001]
     patches, outer_text, inner_text = ax.pie(
         error_sizes,
         colors=colors_main.values(),

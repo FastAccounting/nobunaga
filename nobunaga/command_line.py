@@ -1,4 +1,5 @@
 import argparse
+import os.path
 
 import nobunaga.constants as Const
 from nobunaga.evaluator import Evaluator
@@ -8,17 +9,46 @@ from nobunaga.io import GtJson, PredJson
 
 def arg():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gt", "-g", type=str, default="", required=True)
-    parser.add_argument("--pred", "-p", type=str, default="", required=True)
-    parser.add_argument("--image_dir", "-d", type=str, default="", required=True)
+    parser.add_argument("--gt", "-g", type=str, default="test/jsons/gt_coco.json", required=False)
+    parser.add_argument("--pred", "-p", type=str, default="test/jsons/pred_coco.json", required=False)
+    parser.add_argument("--image_dir", "-d", type=str, default="test/images/", required=False)
     parser.add_argument("--iou_threshold", "-i", type=float, default=0.5)
     parser.add_argument("--confidence_threshold", "-c", type=float, default=0.7)
     parser.add_argument("--model_name", "-m", type=str, default="")
     parser.add_argument("--normalize", type=bool, default=False)
-    parser.add_argument("--output_image", "-o", action="store_true")
+    parser.add_argument("--output_image", "-o", default=True)
     args = parser.parse_args()
-    print(args)
 
+    error_args_name = ""
+    error_args_value = ""
+    if not os.path.exists(args.gt):
+        error_args_name = "gt"
+        error_args_value = args.gt
+    if not os.path.exists(args.pred):
+        error_args_name = "pred"
+        error_args_value = args.pred
+    if not os.path.exists(args.image_dir):
+        error_args_name = "image_dir"
+        error_args_value = args.image_dir
+    if error_args_value != "":
+        print("'{error_args_name}' : '{error_args}' does not exist.".format(
+            error_args_name=error_args_name,
+            error_args=error_args_value
+        ))
+        exit()
+
+    if not os.path.isdir(args.image_dir):
+        error_args_name = "image_dir"
+        error_args_value = args.image_dir
+    if error_args_value != "":
+        print("'{error_args_name}' : '{error_args}' have to be directory.".format(
+            error_args_name=error_args_name,
+            error_args=error_args_value
+        ))
+        exit()
+
+    for arg_name, value in vars(args).items():
+        print(f"{arg_name.ljust(21)}: {value}")
     return args
 
 

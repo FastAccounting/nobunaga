@@ -1,0 +1,199 @@
+{
+  "images": [
+    {
+      "license": 6,
+      "file_name": "000000396863.jpg",
+      "height": 426,
+      "width": 640,
+      "id": 396863
+    }
+  ],
+  "categories": [
+    {
+      "supercategory": "person",
+      "isthing": 1,
+      "id": 1,
+      "name": "person"
+    },
+    {
+      "supercategory": "vehicle",
+      "isthing": 1,
+      "id": 2,
+      "name": "bicycle"
+    },
+    {
+      "supercategory": "animal",
+      "isthing": 1,
+      "id": 19,
+      "name": "horse"
+    },
+    {
+      "supercategory": "animal",
+      "isthing": 1,
+      "id": 20,
+      "name": "sheep"
+    },
+    {
+      "supercategory": "ground",
+      "isthing": 0,
+      "id": 125,
+      "name": "gravel"
+    },
+    {
+      "supercategory": "water",
+      "isthing": 0,
+      "id": 148,
+      "name": "river"
+    },
+    {
+      "supercategory": "ground",
+      "isthing": 0,
+      "id": 149,
+      "name": "road"
+    },
+    {
+      "supercategory": "sky",
+      "isthing": 0,
+      "id": 187,
+      "name": "sky-other-merged"
+    },
+    {
+      "supercategory": "solid",
+      "isthing": 0,
+      "id": 192,
+      "name": "mountain-merged"
+    },
+    {
+      "supercategory": "ground",
+      "isthing": 0,
+      "id": 194,
+      "name": "dirt-merged"
+    }
+  ],
+  "annotations": [
+    {
+      "id": 4537186,
+      "category_id": 1,
+      "iscrowd": 0,
+      "image_id": 396863,
+      "ignore": 0,
+      "bbox": [
+        227,
+        280,
+        15,
+        15
+      ],
+      "area": 145
+    },
+    {
+      "id": 2895691,
+      "category_id": 1,
+      "iscrowd": 0,
+      "bbox": [
+        91,
+        16,
+        117,
+        251
+      ],
+      "area": 12310
+    },
+    {
+      "id": 1053465,
+      "category_id": 19,
+      "iscrowd": 0,
+      "image_id": 396863,
+      "ignore": 0,
+      "bbox": [
+        551,
+        16,
+        89,
+        406
+      ],
+      "area": 30272
+    },
+    {
+      "id": 4873063,
+      "category_id": 19,
+      "iscrowd": 0,
+      "image_id": 396863,
+      "ignore": 0,
+      "bbox": [
+        96,
+        103,
+        181,
+        312
+      ],
+      "area": 24064
+    },
+    {
+      "id": 14342366,
+      "category_id": 125,
+      "iscrowd": 0,
+      "image_id": 396863,
+      "ignore": 0,
+      "bbox": [
+        266,
+        164,
+        288,
+        76
+      ],
+      "area": 7280
+    },
+    {
+      "id": 14932171,
+      "category_id": 148,
+      "iscrowd": 0,
+      "image_id": 396863,
+      "ignore": 0,
+      "bbox": [
+        223,
+        185,
+        340,
+        206
+      ],
+      "area": 45470
+    },
+    {
+      "id": 15855856,
+      "category_id": 187,
+      "iscrowd": 0,
+      "image_id": 396863,
+      "ignore": 0,
+      "bbox": [
+        347,
+        0,
+        203,
+        73
+      ],
+      "area": 8153
+    },
+    {
+      "id": 5989216,
+      "category_id": 192,
+      "iscrowd": 0,
+      "image_id": 396863,
+      "ignore": 0,
+      "bbox": [
+        300,
+        0,
+        340,
+        106
+      ],
+      "area": 14545
+    },
+    {
+      "id": 6780803,
+      "category_id": 194,
+      "iscrowd": 0,
+      "image_id": 396863,
+      "ignore": 0,
+      "bbox": [
+        34,
+        323,
+        241,
+        103
+      ],
+      "area": 8950
+    }
+  ]
+}

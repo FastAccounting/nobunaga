@@ -1,0 +1,224 @@
+{
+  "images": [
+    {
+      "license": 6,
+      "file_name": "000000396863.jpg",
+      "height": 426,
+      "width": 640,
+      "id": 396863
+    }
+  ],
+  "annotations": [
+    {
+      "segments_info": [
+        {
+          "id": 4537186,
+          "category_id": 1,
+          "iscrowd": 0,
+          "bbox": [
+            227,
+            280,
+            15,
+            15
+          ],
+          "area": 145,
+          "score": 0.999963641166687
+        },
+        {
+          "id": 2895691,
+          "category_id": 2,
+          "iscrowd": 0,
+          "bbox": [
+            91,
+            16,
+            117,
+            251
+          ],
+          "area": 12310,
+          "score": 0.999963641166687
+        },
+        {
+          "id": 1053465,
+          "category_id": 19,
+          "iscrowd": 0,
+          "bbox": [
+            551,
+            161,
+            89,
+            406
+          ],
+          "area": 30272,
+          "score": 0.999963641166687
+        },
+        {
+          "id": 4873063,
+          "category_id": 20,
+          "iscrowd": 0,
+          "bbox": [
+            9,
+            103,
+            181,
+            312
+          ],
+          "area": 24064,
+          "score": 0.999963641166687
+        },
+        {
+          "id": 14342366,
+          "category_id": 149,
+          "iscrowd": 0,
+          "bbox": [
+            293,
+            402,
+            240,
+            10
+          ],
+          "area": 7280,
+          "score": 0.999963641166687
+        },
+        {
+          "id": 14342366,
+          "category_id": 125,
+          "iscrowd": 0,
+          "bbox": [
+            256,
+            164,
+            288,
+            76
+          ],
+          "area": 7280,
+          "score": 0.999963641166687
+        },
+        {
+          "id": 14932171,
+          "category_id": 148,
+          "iscrowd": 0,
+          "bbox": [
+            223,
+            185,
+            340,
+            206
+          ],
+          "area": 45470,
+          "score": 0.999963641166687
+        },
+        {
+          "id": 14932171,
+          "category_id": 148,
+          "iscrowd": 0,
+          "bbox": [
+            223,
+            185,
+            340,
+            206
+          ],
+          "area": 45470,
+          "score": 0.999963641166687
+        },
+        {
+          "id": 15855856,
+          "category_id": 187,
+          "iscrowd": 0,
+          "bbox": [
+            347,
+            0,
+            203,
+            73
+          ],
+          "area": 8153,
+          "score": 0.999963641166687
+        },
+        {
+          "id": 5989216,
+          "category_id": 192,
+          "iscrowd": 0,
+          "bbox": [
+            300,
+            0,
+            340,
+            106
+          ],
+          "area": 14545,
+          "score": 0.999963641166687
+        },
+        {
+          "id": 6780803,
+          "category_id": 194,
+          "iscrowd": 0,
+          "bbox": [
+            34,
+            323,
+            241,
+            103
+          ],
+          "area": 8950,
+          "score": 0.999963641166687
+        }
+      ],
+      "file_name": "000000396863.png",
+      "image_id": 396863
+    }
+  ],
+  "categories": [
+    {
+      "supercategory": "person",
+      "isthing": 1,
+      "id": 1,
+      "name": "person"
+    },
+    {
+      "supercategory": "vehicle",
+      "isthing": 1,
+      "id": 2,
+      "name": "bicycle"
+    },
+    {
+      "supercategory": "animal",
+      "isthing": 1,
+      "id": 19,
+      "name": "horse"
+    },
+    {
+      "supercategory": "animal",
+      "isthing": 1,
+      "id": 20,
+      "name": "sheep"
+    },
+    {
+      "supercategory": "ground",
+      "isthing": 0,
+      "id": 125,
+      "name": "gravel"
+    },
+    {
+      "supercategory": "water",
+      "isthing": 0,
+      "id": 148,
+      "name": "river"
+    },
+    {
+      "supercategory": "ground",
+      "isthing": 0,
+      "id": 149,
+      "name": "road"
+    },
+    {
+      "supercategory": "sky",
+      "isthing": 0,
+      "id": 187,
+      "name": "sky-other-merged"
+    },
+    {
+      "supercategory": "solid",
+      "isthing": 0,
+      "id": 192,
+      "name": "mountain-merged"
+    },
+    {
+      "supercategory": "ground",
+      "isthing": 0,
+      "id": 194,
+      "name": "dirt-merged"
+    }
+  ]
+}
