@@ -120,5 +120,5 @@ All undetected ground truths (false negatives) are not already covered by classi
 In Nobunaga, "not already covered by all other errors" define as Miss Error, and more labels tend to be explained as Miss Error more than other errors.
 
 ## Copyright
-We use GenEi Gothic-Font to visualize above errors.
-![Distribution site](https://okoneya.jp/font/)
+We use GenEi Gothic-Font to visualize above errors.  
+[Distribution site](https://okoneya.jp/font/)
