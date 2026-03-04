@@ -1,6 +1,7 @@
 import math
 import os
 import platform
+from pathlib import Path
 
 import numpy as np
 import PIL
@@ -11,8 +12,14 @@ def write_label(image_path: str, new_file_path: str, bboxes: dict, col_size: int
     images = []
     image_height = 0
     image_width = 0
+    error_count = 0
     for title, bbox_list in bboxes.items():
-        image = PIL.Image.open(image_path)
+        try:
+            image = PIL.Image.open(image_path)
+        except:
+            error_count += 1
+            continue
+
         if image.mode != "RGB":
             image = image.convert("RGB")
 
@@ -55,7 +62,9 @@ def write_label(image_path: str, new_file_path: str, bboxes: dict, col_size: int
         image_width = image.width
         images.append(image)
 
-    row_count = math.ceil(len(bboxes) / col_size)
+    row_count = math.ceil((len(bboxes) - error_count) / col_size)
+    if not row_count:
+        return None
     merged_image = PIL.Image.new("RGB", (image_width * col_size, image_height * row_count))
     col_index = 0
     row_index = 0
@@ -66,12 +75,16 @@ def write_label(image_path: str, new_file_path: str, bboxes: dict, col_size: int
             row_index += 1
         else:
             col_index += 1
-    merged_image.save(new_file_path)
+    try:
+        merged_image.save(new_file_path)
+    except:
+        return None
+
     return new_file_path
 
 
 def get_font(text_size: int):
-    font_path = "assets/font/GenEiGothicP-Regular.otf"
+    font_path = str(Path(__file__).parents[2] / "assets/font/GenEiGothicP-Regular.otf")
     font = ImageFont.truetype(font_path, text_size)
     return font
 
