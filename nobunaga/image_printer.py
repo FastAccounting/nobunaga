@@ -423,7 +423,10 @@ class ImagePrinter(object):
                 output_dir
                 / f"{image_name_path.stem}_{str(index_dict.get(image_name, 1))}{image_name_path.suffix}"
             )
-            write_label(str(self._image_dir / image_name), new_file_path, bboxes, 2)
+            try:
+                write_label(str(self._image_dir / image_name), new_file_path, bboxes, 2)
+            except:
+                continue
             index_dict[image_name] = index_dict.get(image_name, 1) + 1
 
     def output_error_summary(self):
